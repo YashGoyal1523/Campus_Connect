@@ -148,7 +148,7 @@ export const registerSociety = async (req, res) => {
       { expiresIn: "7d" }
     );
 
-    res.status(201).json({ token, user: { id: society._id, name: society.name, role: "society" } });
+    res.status(201).json({ token, user: { id: society._id, name: society.name, role: "society", logo: society.logo } });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -171,7 +171,7 @@ export const loginSociety = async (req, res) => {
       { expiresIn: "7d" }
     );
 
-    res.json({ token, user: { id: society._id, name: society.name, role: "society" } });
+    res.json({ token, user: { id: society._id, name: society.name, role: "society", logo: society.logo } });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
