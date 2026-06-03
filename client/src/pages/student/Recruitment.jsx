@@ -73,10 +73,19 @@ export default function Recruitment() {
                     {isExpired ? "Closed" : "Open"}
                   </span>
                 </div>
-                <p className="text-white/50 text-sm leading-relaxed mb-4 line-clamp-2">{r.description}</p>
-                <p className="text-white/40 text-xs">
-                  Deadline: {deadline.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
-                </p>
+                <p className="text-white/50 text-sm leading-relaxed mb-3 line-clamp-2">{r.description}</p>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-white/40 text-xs">
+                    Deadline: {deadline.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                  </span>
+                  {!isExpired && r.googleFormLink && (
+                    <a href={toAbsoluteUrl(r.googleFormLink)} target="_blank" rel="noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="shrink-0 px-4 py-1.5 rounded-xl bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 transition text-xs font-semibold">
+                      Apply →
+                    </a>
+                  )}
+                </div>
               </div>
             );
           })}

@@ -84,8 +84,15 @@ export default function Events() {
                       <p className="text-white/30 text-xs">{date.getFullYear()}</p>
                     </div>
                   </div>
-                  <p className="text-white/50 text-xs leading-relaxed line-clamp-2">{e.description}</p>
-                  <p className="text-white/40 text-xs mt-2 truncate">📍 {e.venue}</p>
+                  <p className="text-white/50 text-xs leading-relaxed line-clamp-2 mb-2">{e.description}</p>
+                  <p className="text-white/40 text-xs truncate">📍 {e.venue}</p>
+                  {e.googleFormLink && (
+                    <a href={toAbsoluteUrl(e.googleFormLink)} target="_blank" rel="noreferrer"
+                      onClick={(ev) => ev.stopPropagation()}
+                      className="inline-block mt-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 transition text-xs font-semibold">
+                      Register →
+                    </a>
+                  )}
                 </div>
               </div>
             );
