@@ -127,7 +127,7 @@ export const loginStudent = async (req, res) => {
 // ─── REGISTER SOCIETY ─────────────────────────────────────────────────────────
 export const registerSociety = async (req, res) => {
   try {
-    const { name, email, password, college, category } = req.body;
+    const { name, email, password, college, category, description } = req.body;
 
     const existing = await Society.findOne({ email });
     if (existing) return res.status(400).json({ message: "Email already registered" });
@@ -140,7 +140,7 @@ export const registerSociety = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const society = await Society.create({ name, email, password: hashedPassword, college, category, logo });
+    const society = await Society.create({ name, email, password: hashedPassword, college, category, description, logo });
 
     const token = jwt.sign(
       { id: society._id, role: "society", name: society.name },
