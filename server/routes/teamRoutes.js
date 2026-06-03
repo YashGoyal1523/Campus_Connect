@@ -15,8 +15,6 @@
 //
 //   STUDENT ROUTES — for a student viewing their team memberships:
 //     GET    /api/team/my-societies                    — list societies the student is a member of
-//     GET    /api/team/my-announcements                — all internal announcements across their societies
-//     GET    /api/team/my-members                      — co-members in all their societies
 //     GET    /api/team/society/:societyId/members      — member list of a specific society
 //     GET    /api/team/society/:societyId/announcements — announcements of a specific society
 //
@@ -34,7 +32,7 @@ import express from "express";
 import {
   addMember, getMembers, removeMember,
   postTeamAnnouncement, getTeamAnnouncements, deleteTeamAnnouncement,
-  getMySocieties, getSocietyMembers, getSocietyTeamAnnouncements, getMyTeamAnnouncements, getMyTeamMembers,
+  getMySocieties, getSocietyMembers, getSocietyTeamAnnouncements,
 } from "../controllers/teamController.js";
 import verifyToken from "../middleware/authMiddleware.js"; // JWT validation
 import verifyRole from "../middleware/roleMiddleware.js"; // role-based access guard
@@ -85,16 +83,6 @@ router.delete("/announcements/:id", verifyToken, verifyRole("society"), deleteTe
 // Returns a list of all societies the logged-in student is a member of.
 // Used on the student's dashboard to show their team memberships at a glance.
 router.get("/my-societies", verifyToken, verifyRole("student"), getMySocieties);
-
-// GET /api/team/my-announcements
-// Returns all internal team announcements from every society the student is a member of.
-// Aggregates announcements across multiple societies into one feed.
-router.get("/my-announcements", verifyToken, verifyRole("student"), getMyTeamAnnouncements);
-
-// GET /api/team/my-members
-// Returns co-members across all societies the student belongs to.
-// Lets a student see who else is on their team(s).
-router.get("/my-members", verifyToken, verifyRole("student"), getMyTeamMembers);
 
 // GET /api/team/society/:societyId/members
 // Returns the member list for a specific society.

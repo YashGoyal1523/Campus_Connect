@@ -60,58 +60,6 @@ export const getSocietyTeamAnnouncements = async (req, res) => {
   }
 };
 
-// ─── GET ALL TEAM ANNOUNCEMENTS ACROSS ALL MY SOCIETIES ──────────────────────
-// Used for badge count calculation in StudentDashboard
-// Gets announcements from every society the student belongs to in one query
-export const getMyTeamAnnouncements = async (req, res) => {
-  try {
-    const student = await Student.findById(req.user.id);
-    if (!student) return res.status(404).json({ message: "Student not found" });
-    const memberships = await TeamMember.find({ rollNo: student.rollNo });
-
-    // Extract just the society IDs from memberships
-    const societyIds = memberships.map((m) => m.society);
-
-    // $in fetches documents where society matches ANY of the IDs in the array
-    const announcements = await TeamAnnouncement.find({ society: { $in: societyIds } })
-      .sort({ createdAt: -1 });
-    res.json(announcements);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
-
-// ─── GET ALL TEAM MEMBERS ACROSS ALL MY SOCIETIES ────────────────────────────
-// Used for badge count — know when new members join any of my societies
-export const getMyTeamMembers = async (req, res) => {
-  try {
-    const student = await Student.findById(req.user.id);
-    if (!student) return res.status(404).json({ message: "Student not found" });
-    const memberships = await TeamMember.find({ rollNo: student.rollNo });
-    const societyIds = memberships.map((m) => m.society);
-    const members = await TeamMember.find({ society: { $in: societyIds } })
-      .sort({ createdAt: -1 });
-    res.json(members);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
-
-// ─── GET ALL TEAM ANNOUNCEMENTS FROM MY SOCIETIES ────────────────────────────
-// Used for badge count calculation
-export const getMyTeamAnnouncement = async (req, res) => {
-  try {
-    const student = await Student.findById(req.user.id);
-    if (!student) return res.status(404).json({ message: "Student not found" });
-    const memberships = await TeamMember.find({ rollNo: student.rollNo });
-    const societyIds = memberships.map((m) => m.society);
-    const announcements = await TeamAnnouncement.find({ society: { $in: societyIds } })
-      .sort({ createdAt: -1 });
-    res.json(announcements);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // SOCIETY-FACING ENDPOINTS

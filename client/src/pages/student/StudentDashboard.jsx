@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import axios from "../../utils/axios";
@@ -14,7 +14,7 @@ import MySocieties from "./MySocieties";
 // It renders a fixed top navbar, a fixed left sidebar, and a main content area.
 // The active tab controls which page component is rendered inside the main area.
 
-// navItems drives both the sidebar buttons and the badge state keys.
+// navItems drives the sidebar buttons.
 // Defined outside the component so the array is never recreated on re-renders.
 const navItems = [
   { id: "feed", label: "Feed", icon: "🏠" },
@@ -25,26 +25,9 @@ const navItems = [
   { id: "events", label: "Events", icon: "🎉" },
 ];
 
-// Generates a unique localStorage key for each section
-// e.g. "cc_lastSeen_events", "cc_lastSeen_feed"
-const lastSeenKey = (section) => `cc_lastSeen_${section}`;
-
-// Counts how many items are newer than the last time student visited this section
-// items = array of objects with createdAt field
-// section = which nav tab (used to get the saved timestamp from localStorage)
-const countNew = (items, section) => {
-  const lastSeen = localStorage.getItem(lastSeenKey(section));
-  // If never visited before, all items are "new"
-  if (!lastSeen) return items.length;
-  // Compare each item's creation time against the saved last-seen timestamp
-  return items.filter((item) => new Date(item.createdAt) > new Date(lastSeen)).length;
-};
-
 export default function StudentDashboard() {
   // active: which sidebar tab is currently selected; determines which component renders
   const [active, setActive] = useState("feed");
-  // badges: a map of tab id → unread count shown as pill badges in the sidebar
-  const [badges, setBadges] = useState({ feed: 0, discover: 0, "my-societies": 0, announcements: 0, recruitment: 0, events: 0 });
   // profileOpen: whether the profile slide-over modal is visible
   const [profileOpen, setProfileOpen] = useState(false);
   // profile: cached /auth/me response; only fetched once (re-used on subsequent modal opens)
@@ -53,54 +36,6 @@ export default function StudentDashboard() {
   const [memberships, setMemberships] = useState([]);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-
-  // On mount — fetch all section data to calculate unread badge counts
-  // All 6 requests fire simultaneously using Promise.all (faster than sequential)
-  useEffect(() => {
-    const fetchBadgeCounts = async () => {
-      try {
-        const [
-          { data: feedData },
-          { data: societiesData },
-          { data: announcementsData },
-          { data: recruitmentsData },
-          { data: eventsData },
-          { data: mySocietiesData },
-        ] = await Promise.all([
-          axios.get("/follow/feed"),
-          axios.get("/societies"),
-          axios.get("/announcements"),
-          axios.get("/recruitments"),
-          axios.get("/events"),
-          axios.get("/team/my-societies"),
-        ]);
-
-        // Paginated endpoints return { data: [...], hasMore } — use .data to get the array
-        // my-societies is NOT paginated — returns plain array directly
-        setBadges({
-          feed: countNew(feedData.data, "feed"),
-          discover: countNew(societiesData.data, "discover"),
-          announcements: countNew(announcementsData.data, "announcements"),
-          recruitment: countNew(recruitmentsData.data, "recruitment"),
-          events: countNew(eventsData.data, "events"),
-          "my-societies": countNew(mySocietiesData, "my-societies"),
-        });
-      } catch {
-        // badge counts are non-critical — silently ignore failures
-      }
-    };
-    fetchBadgeCounts();
-  }, []);
-
-  // When student clicks a nav tab:
-  // 1. Switch active section
-  // 2. Save current time as "last seen" for this section (resets badge next visit)
-  // 3. Clear the badge count immediately
-  const handleTabChange = (id) => {
-    setActive(id);
-    localStorage.setItem(lastSeenKey(id), new Date().toISOString());
-    setBadges((prev) => ({ ...prev, [id]: 0 }));
-  };
 
   // Clears auth state and redirects to the landing page
   const handleLogout = () => {
@@ -208,20 +143,13 @@ export default function StudentDashboard() {
           <p className="text-white/30 text-xs font-semibold uppercase tracking-widest px-3 mb-2">Menu</p>
           {navItems.map((item) => (
             // Active tab gets a gradient highlight; inactive tabs show a hover effect
-            <button key={item.id} onClick={() => handleTabChange(item.id)}
+            <button key={item.id} onClick={() => setActive(item.id)}
               className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition text-left w-full
                 ${active === item.id
                   ? "bg-linear-to-r from-purple-500/30 to-blue-500/30 border border-purple-500/40 text-white"
                   : "text-white/50 hover:bg-white/5 hover:text-white"}`}>
               <span className="text-lg">{item.icon}</span>
-              {/* flex-1 pushes the badge pill to the far right */}
-              <span className="flex-1">{item.label}</span>
-              {/* Only render the badge pill when there is at least one new item */}
-              {badges[item.id] > 0 && (
-                <span className="text-xs bg-purple-500 text-white font-bold px-1.5 py-0.5 rounded-full min-w-5 text-center">
-                  {badges[item.id]}
-                </span>
-              )}
+              <span>{item.label}</span>
             </button>
           ))}
         </aside>
@@ -286,11 +214,9 @@ export default function StudentDashboard() {
                       {memberships.map((m) => (
                         <div key={m._id} className="flex items-center justify-between gap-2">
                           <div className="flex items-center gap-2 min-w-0">
-                            {/* Logo or initial fallback */}
                             {m.society?.logo
                               ? <img src={m.society.logo} className="w-7 h-7 rounded-full object-contain bg-slate-800 border border-white/20 shrink-0" />
                               : <div className="w-7 h-7 rounded-full bg-slate-800 border border-white/20 flex items-center justify-center text-xs font-bold text-white/70 shrink-0">{m.society?.name?.charAt(0)}</div>}
-                            {/* truncate prevents long names from overflowing the card */}
                             <span className="text-sm truncate">{m.society?.name}</span>
                           </div>
                           <span className="text-xs px-2 py-0.5 rounded-full border border-white/20 bg-white/5 text-white/50 shrink-0">{m.position}</span>

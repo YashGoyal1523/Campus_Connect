@@ -62,36 +62,18 @@ export default function TeamManager() {
   const [announcementForm, setAnnouncementForm] = useState({ title: "", content: "" });
   // announcementLoading: disables the post button while the request is in progress
   const [announcementLoading, setAnnouncementLoading] = useState(false);
-  // chatBadge: number of unread messages in the group chat since the society last viewed the Chat tab
-  const [chatBadge, setChatBadge] = useState(0);
-
-  // localStorage key for persisting when the society last viewed the chat tab.
-  // Uses user.id so each society has its own separate key.
-  const chatKey = `cc_society_chat_lastSeen_${user?.id}`;
-
-  // On mount: fetch members, team announcements, and chat messages in parallel.
-  // After fetching, compute the unread message badge by comparing message timestamps
-  // against the last-seen timestamp stored in localStorage.
+  // On mount: fetch members and team announcements in parallel.
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [{ data: membersData }, { data: announcementsData }, { data: messagesData }] = await Promise.all([
+        const [{ data: membersData }, { data: announcementsData }] = await Promise.all([
           axios.get("/team/members"),
           axios.get("/team/announcements"),
-          axios.get(`/messages/${user.id}`),
         ]);
         setMembers(membersData);
         setAnnouncements(announcementsData);
-
-        // Count messages sent by students that arrived after the society last opened the Chat tab.
-        // Only student messages count — messages from the society itself shouldn't create a badge.
-        const lastSeen = localStorage.getItem(chatKey);
-        const unread = messagesData.filter((msg) =>
-          msg.senderRole === "student" && (!lastSeen || new Date(msg.createdAt) > new Date(lastSeen))
-        ).length;
-        setChatBadge(unread);
       } catch {
-        // handled by axios interceptor; ensures setFetching always runs
+        // handled by axios interceptor
       } finally {
         setFetching(false);
       }
@@ -169,31 +151,13 @@ export default function TeamManager() {
       <h1 className="text-3xl font-bold mb-2">Team</h1>
       <p className="text-white/40 mb-6">Manage your society's team members and internal announcements</p>
 
-      {/* Tab bar — the Chat tab has a live badge count for unread student messages.
-          Switching to the Chat tab saves the current timestamp to localStorage and clears the badge. */}
+      {/* Tab bar */}
       <div className="flex gap-2 mb-8 border-b border-white/10 pb-0">
-        {[
-          { id: "members", label: "👥 Members", badge: 0 },
-          { id: "announcements", label: "📣 Team Announcements", badge: 0 },
-          { id: "chat", label: "💬 Group Chat", badge: chatBadge },
-        ].map(({ id, label, badge }) => (
-          <button key={id} onClick={() => {
-            setTab(id);
-            // When the society opens the Chat tab, record the timestamp and clear the badge
-            if (id === "chat") {
-              localStorage.setItem(chatKey, new Date().toISOString());
-              setChatBadge(0);
-            }
-          }}
-            className={`flex items-center gap-2 px-5 py-2.5 text-sm font-medium transition border-b-2 -mb-px
+        {["members", "announcements", "chat"].map((id) => (
+          <button key={id} onClick={() => setTab(id)}
+            className={`px-5 py-2.5 text-sm font-medium transition border-b-2 -mb-px
               ${tab === id ? "border-purple-500 text-white" : "border-transparent text-white/40 hover:text-white/70"}`}>
-            {label}
-            {/* Badge pill: only rendered when badge > 0 */}
-            {badge > 0 && (
-              <span className="text-xs bg-purple-500 text-white font-bold px-1.5 py-0.5 rounded-full min-w-5 text-center">
-                {badge}
-              </span>
-            )}
+            {id === "members" ? "👥 Members" : id === "announcements" ? "📣 Team Announcements" : "💬 Group Chat"}
           </button>
         ))}
       </div>

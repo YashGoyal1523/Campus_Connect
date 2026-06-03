@@ -3,6 +3,7 @@ import axios from "../../utils/axios";
 import Spinner from "../../components/Spinner";
 import GroupChat from "../../components/GroupChat";
 import { useAuth } from "../../context/AuthContext";
+import toast from "react-hot-toast";
 
 // Converts a UTC date string to a relative time string ("2m ago", "1h ago", etc.)
 const timeAgo = (date) => {
@@ -29,30 +30,15 @@ const POSITION_COLORS = {
   "General Member": "bg-white/10 text-white/50 border-white/20",
 };
 
-// Counts how many items in an array are newer than the last-seen timestamp stored in localStorage.
-// `key` is the localStorage key for that feed (e.g. "cc_lastSeen_society_123_members").
-// If no timestamp is stored, all items are treated as new.
-const countNew = (items, key) => {
-  const lastSeen = localStorage.getItem(key);
-  if (!lastSeen) return items.length;
-  return items.filter((item) => new Date(item.createdAt) > new Date(lastSeen)).length;
-};
-
-// MySocieties shows a student all the societies they are a team member of
-// (not just following — these are societies where the society has explicitly added them).
+// MySocieties shows a student all the societies they are a team member of.
 // It has two views:
-//   Grid view: a card for each membership with a badge count of unseen activity.
+//   Grid view: a card for each membership.
 //   Detail view: tabs for Members, Announcements, and Group Chat within a selected society.
 export default function MySocieties() {
   const { user } = useAuth();
 
   // memberships: the student's society memberships (each has a .society object and .position)
   const [memberships, setMemberships] = useState([]);
-  // allMembers / allAnnouncements / allMessages: pre-fetched data for ALL societies,
-  // used to compute per-card notification badges in the grid view without extra API calls
-  const [allMembers, setAllMembers] = useState([]);
-  const [allAnnouncements, setAllAnnouncements] = useState([]);
-  const [allMessages, setAllMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   // search: text for filtering the society cards in the grid view
   const [search, setSearch] = useState("");
@@ -68,39 +54,15 @@ export default function MySocieties() {
   const [detailLoading, setDetailLoading] = useState(false);
   // memberSearch: text for filtering the member list within the detail view
   const [memberSearch, setMemberSearch] = useState("");
-
-  // Per-tab badge counts: track how many items in each tab are newer than the last time
-  // the student visited that tab for the currently open society
-  const [membersBadge, setMembersBadge] = useState(0);
-  const [announcementsBadge, setAnnouncementsBadge] = useState(0);
-  const [chatBadge, setChatBadge] = useState(0);
   // selectedAnnouncement: the announcement open in the inner announcement modal
   const [selectedAnnouncement, setSelectedAnnouncement] = useState(null);
 
-  // On mount: fetch all data needed for the grid view in parallel.
-  // Promise.all fires all requests simultaneously, which is faster than sequential awaits.
+  // On mount: fetch the student's society memberships
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [{ data: mySocietiesData }, { data: membersData }, { data: announcementsData }] = await Promise.all([
-          axios.get("/team/my-societies"),
-          axios.get("/team/my-members"),
-          axios.get("/team/my-announcements"),
-        ]);
-        setMemberships(mySocietiesData);
-        setAllMembers(membersData);
-        setAllAnnouncements(announcementsData);
-
-        // Fetch chat message history for each society the student belongs to.
-        // Done separately (after the main Promise.all) because we need mySocietiesData first.
-        const messagesBySociety = await Promise.all(
-          mySocietiesData.map((m) => axios.get(`/messages/${m.society._id}`))
-        );
-        // Store messages alongside their societyId for quick lookup in getCardBadge
-        setAllMessages(messagesBySociety.map(({ data }, i) => ({
-          societyId: mySocietiesData[i].society._id,
-          messages: data,
-        })));
+        const { data } = await axios.get("/team/my-societies");
+        setMemberships(data);
       } catch {
         // 401 handled by interceptor; others fail silently
       } finally {
@@ -110,81 +72,27 @@ export default function MySocieties() {
     fetchData();
   }, []);
 
-  // Computes the total notification badge count for a society card in the grid.
-  // Counts new members + new announcements (using general last-seen timestamp)
-  // and new chat messages (using a separate chat-specific last-seen timestamp).
-  // Two separate localStorage keys are used because chat and general content are
-  // marked as "seen" at different times (entering the chat tab vs. opening the society).
-  const getCardBadge = (societyId) => {
-    const chatLastSeen = localStorage.getItem(`cc_lastSeen_society_${societyId}_chat`);
-    const generalLastSeen = localStorage.getItem(`cc_lastSeen_society_${societyId}`);
-
-    const newMembers = allMembers.filter((m) =>
-      m.society?.toString() === societyId && (!generalLastSeen || new Date(m.createdAt) > new Date(generalLastSeen))
-    ).length;
-
-    const newAnnouncements = allAnnouncements.filter((a) =>
-      a.society?.toString() === societyId && (!generalLastSeen || new Date(a.createdAt) > new Date(generalLastSeen))
-    ).length;
-
-    const societyMessages = allMessages.find((s) => s.societyId === societyId)?.messages || [];
-    const newMessages = societyMessages.filter((msg) =>
-      !chatLastSeen || new Date(msg.createdAt) > new Date(chatLastSeen)
-    ).length;
-
-    return newMembers + newAnnouncements + newMessages;
-  };
-
   // Opens the detail view for a specific society membership.
-  // Fetches members, announcements, and messages in parallel, then computes per-tab badges.
-  // Also records the current time as "last visited" in localStorage to reset the card badge.
+  // Fetches members, announcements, and messages in parallel.
   const openSociety = async (membership) => {
     const societyId = membership.society._id;
     setSelected(membership);
-    setTab("members");     // Always start on the Members tab
-    setMemberSearch("");   // Clear any leftover search from a previous society view
+    setTab("members");
+    setMemberSearch("");
     setDetailLoading(true);
 
     try {
-      const [{ data: membersData }, { data: announcementsData }, { data: messagesData }] = await Promise.all([
+      const [{ data: membersData }, { data: announcementsData }] = await Promise.all([
         axios.get(`/team/society/${societyId}/members`),
         axios.get(`/team/society/${societyId}/announcements`),
-        axios.get(`/messages/${societyId}`),
       ]);
       setMembers(membersData);
       setAnnouncements(announcementsData);
-
-      // Calculate how many items in each tab are newer than when the student last saw them
-      setMembersBadge(countNew(membersData, `cc_lastSeen_society_${societyId}_members`));
-      setAnnouncementsBadge(countNew(announcementsData, `cc_lastSeen_society_${societyId}_announcements`));
-      setChatBadge(countNew(messagesData, `cc_lastSeen_society_${societyId}_chat`));
-
-      // Mark the society as "visited now" — the next card badge will show 0
-      localStorage.setItem(`cc_lastSeen_society_${societyId}`, new Date().toISOString());
     } catch {
-      // Go back to the grid view so the user isn't stuck on a permanent spinner
       setSelected(null);
       toast.error("Failed to load society details");
     } finally {
       setDetailLoading(false);
-    }
-  };
-
-  // Called when the student switches tabs in the detail view.
-  // Records the current time to localStorage for the newly active tab,
-  // then clears that tab's badge counter so it no longer shows a number.
-  const handleTabChange = (id) => {
-    setTab(id);
-    const societyId = selected.society._id;
-    if (id === "members") {
-      localStorage.setItem(`cc_lastSeen_society_${societyId}_members`, new Date().toISOString());
-      setMembersBadge(0);
-    } else if (id === "announcements") {
-      localStorage.setItem(`cc_lastSeen_society_${societyId}_announcements`, new Date().toISOString());
-      setAnnouncementsBadge(0);
-    } else if (id === "chat") {
-      localStorage.setItem(`cc_lastSeen_society_${societyId}_chat`, new Date().toISOString());
-      setChatBadge(0);
     }
   };
 
@@ -235,24 +143,17 @@ export default function MySocieties() {
           </div>
         </div>
 
-        {/* Tab bar: shows badge counts on each tab.
-            The -mb-px trick on the active button's border-b-2 aligns it flush with the separator line below. */}
+        {/* Tab bar */}
         <div className="flex gap-2 border-b border-white/10 mb-6">
           {[
-            { id: "members", label: "👥 Members", badge: membersBadge },
-            { id: "announcements", label: "📣 Announcements", badge: announcementsBadge },
-            { id: "chat", label: "💬 Group Chat", badge: chatBadge },
-          ].map(({ id, label, badge }) => (
-            <button key={id} onClick={() => handleTabChange(id)}
-              className={`flex items-center gap-2 px-5 py-2.5 text-sm font-medium transition border-b-2 -mb-px
+            { id: "members", label: "👥 Members" },
+            { id: "announcements", label: "📣 Announcements" },
+            { id: "chat", label: "💬 Group Chat" },
+          ].map(({ id, label }) => (
+            <button key={id} onClick={() => setTab(id)}
+              className={`px-5 py-2.5 text-sm font-medium transition border-b-2 -mb-px
                 ${tab === id ? "border-purple-500 text-white" : "border-transparent text-white/40 hover:text-white/70"}`}>
               {label}
-              {/* Badge pill only rendered when there are unseen items */}
-              {badge > 0 && (
-                <span className="text-xs bg-purple-500 text-white font-bold px-1.5 py-0.5 rounded-full min-w-5 text-center">
-                  {badge}
-                </span>
-              )}
             </button>
           ))}
         </div>
@@ -278,7 +179,6 @@ export default function MySocieties() {
                         {m.name.charAt(0).toUpperCase()}
                       </div>
                       <div className="min-w-0">
-                        {/* truncate prevents long names from overflowing the card */}
                         <p className="text-sm font-medium truncate">{m.name}</p>
                         <p className="text-white/30 text-xs">Roll: {m.rollNo}</p>
                       </div>
@@ -302,7 +202,6 @@ export default function MySocieties() {
                   className="rounded-xl bg-white/5 border border-white/10 p-4 cursor-pointer hover:border-white/20 transition"
                   onClick={() => setSelectedAnnouncement(a)}>
                   <div className="flex items-center gap-2 mb-2">
-                    {/* "Internal" badge distinguishes team-only announcements from public ones */}
                     <span className="text-xs px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">Internal</span>
                     <span className="text-white/30 text-xs">{timeAgo(a.createdAt)}</span>
                   </div>
@@ -321,8 +220,7 @@ export default function MySocieties() {
           />
         )}
 
-      {/* Inner modal: shows the full content of a selected team announcement.
-          Backdrop click closes it; stopPropagation on the panel prevents that. */}
+      {/* Inner modal: shows the full content of a selected team announcement */}
       {selectedAnnouncement && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center px-4"
           onClick={() => setSelectedAnnouncement(null)}>
@@ -374,38 +272,23 @@ export default function MySocieties() {
                 m.society?.category?.toLowerCase().startsWith(q) ||
                 m.position.toLowerCase().startsWith(q);
             })
-            .map((m) => {
-              // Compute the badge for this card on every render.
-              // If any new members, announcements, or messages have arrived since last visit,
-              // the badge shows the total count.
-              const cardBadge = getCardBadge(m.society._id);
-              return (
-                <div key={m._id} onClick={() => openSociety(m)}
-                  className="cursor-pointer rounded-2xl bg-white/5 border border-white/10 hover:border-purple-500/40 hover:bg-white/10 transition p-5 flex items-center gap-4 relative">
-                  {m.society?.logo
-                    ? <img src={m.society.logo} className="w-12 h-12 rounded-full object-contain bg-slate-800 border border-white/20 shrink-0" />
-                    : <div className="w-12 h-12 rounded-full bg-slate-800 border border-white/20 flex items-center justify-center text-xl font-bold text-white/70 shrink-0">
-                        {m.society?.name?.charAt(0).toUpperCase()}
-                      </div>}
-                  <div className="min-w-0 flex-1">
-                    {/* truncate prevents long society names from overflowing */}
-                    <p className="font-bold text-sm truncate">{m.society?.name}</p>
-                    <p className="text-white/40 text-xs">{m.society?.category}</p>
-                    {/* Position badge using the shared color map */}
-                    <span className={`inline-block mt-1.5 text-xs px-2 py-0.5 rounded-full border ${POSITION_COLORS[m.position] || POSITION_COLORS["General Member"]}`}>
-                      {m.position}
-                    </span>
-                  </div>
-                  {/* Notification badge in the top-right corner of the card;
-                      only rendered when there is unseen activity */}
-                  {cardBadge > 0 && (
-                    <span className="absolute top-3 right-3 text-xs bg-purple-500 text-white font-bold px-1.5 py-0.5 rounded-full min-w-5 text-center">
-                      {cardBadge}
-                    </span>
-                  )}
+            .map((m) => (
+              <div key={m._id} onClick={() => openSociety(m)}
+                className="cursor-pointer rounded-2xl bg-white/5 border border-white/10 hover:border-purple-500/40 hover:bg-white/10 transition p-5 flex items-center gap-4">
+                {m.society?.logo
+                  ? <img src={m.society.logo} className="w-12 h-12 rounded-full object-contain bg-slate-800 border border-white/20 shrink-0" />
+                  : <div className="w-12 h-12 rounded-full bg-slate-800 border border-white/20 flex items-center justify-center text-xl font-bold text-white/70 shrink-0">
+                      {m.society?.name?.charAt(0).toUpperCase()}
+                    </div>}
+                <div className="min-w-0 flex-1">
+                  <p className="font-bold text-sm truncate">{m.society?.name}</p>
+                  <p className="text-white/40 text-xs">{m.society?.category}</p>
+                  <span className={`inline-block mt-1.5 text-xs px-2 py-0.5 rounded-full border ${POSITION_COLORS[m.position] || POSITION_COLORS["General Member"]}`}>
+                    {m.position}
+                  </span>
                 </div>
-              );
-            })}
+              </div>
+            ))}
         </div>
       )}
     </div>
