@@ -41,7 +41,7 @@ export default function SocietyDashboard() {
       axios.get(`/posts/${user.id}`),
     ]);
     setProfile(profileData);
-    setPosts(postsData);
+    setPosts(postsData.data);
   };
 
   const handleDeleteAccount = async () => {
