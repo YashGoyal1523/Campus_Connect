@@ -1,3 +1,6 @@
+// Spinner — full-section loading indicator shown while async data is being fetched.
+// Uses a CSS border trick: all borders are purple except the top one (transparent),
+// which creates the spinning arc effect via Tailwind's animate-spin (CSS animation).
 export default function Spinner() {
   return (
     <div className="flex items-center justify-center h-64">

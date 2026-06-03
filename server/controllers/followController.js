@@ -40,6 +40,7 @@ export const getFeed = async (req, res) => {
     const { page, limit, skip } = getPagination(req.query);
 
     const student = await Student.findById(req.user.id);
+    if (!student) return res.status(404).json({ message: "Student not found" });
 
     // $in operator — fetch posts where society field matches ANY id in the following array
     // This is how we get posts from ALL followed societies in one query

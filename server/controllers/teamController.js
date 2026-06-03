@@ -12,6 +12,7 @@ import Student from "../models/StudentModel.js";
 export const getMySocieties = async (req, res) => {
   try {
     const student = await Student.findById(req.user.id);
+    if (!student) return res.status(404).json({ message: "Student not found" });
 
     // Find all TeamMember records where rollNo matches this student
     // populate() replaces the society ObjectId with the actual society document
@@ -42,6 +43,7 @@ export const getSocietyMembers = async (req, res) => {
 export const getSocietyTeamAnnouncements = async (req, res) => {
   try {
     const student = await Student.findById(req.user.id);
+    if (!student) return res.status(404).json({ message: "Student not found" });
 
     // Verify the student actually belongs to this society before showing announcements
     const isMember = await TeamMember.findOne({
@@ -64,6 +66,7 @@ export const getSocietyTeamAnnouncements = async (req, res) => {
 export const getMyTeamAnnouncements = async (req, res) => {
   try {
     const student = await Student.findById(req.user.id);
+    if (!student) return res.status(404).json({ message: "Student not found" });
     const memberships = await TeamMember.find({ rollNo: student.rollNo });
 
     // Extract just the society IDs from memberships
@@ -83,6 +86,7 @@ export const getMyTeamAnnouncements = async (req, res) => {
 export const getMyTeamMembers = async (req, res) => {
   try {
     const student = await Student.findById(req.user.id);
+    if (!student) return res.status(404).json({ message: "Student not found" });
     const memberships = await TeamMember.find({ rollNo: student.rollNo });
     const societyIds = memberships.map((m) => m.society);
     const members = await TeamMember.find({ society: { $in: societyIds } })
@@ -98,6 +102,7 @@ export const getMyTeamMembers = async (req, res) => {
 export const getMyTeamAnnouncement = async (req, res) => {
   try {
     const student = await Student.findById(req.user.id);
+    if (!student) return res.status(404).json({ message: "Student not found" });
     const memberships = await TeamMember.find({ rollNo: student.rollNo });
     const societyIds = memberships.map((m) => m.society);
     const announcements = await TeamAnnouncement.find({ society: { $in: societyIds } })

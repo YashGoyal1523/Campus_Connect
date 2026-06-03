@@ -34,9 +34,14 @@ export default function GroupChat({ societyId, currentUserName, currentUserRole 
     // ── LOAD CHAT HISTORY ────────────────────────────────────────────────────
     // Fetch all previous messages from MongoDB via REST API
     const fetchHistory = async () => {
-      const { data } = await axios.get(`/messages/${societyId}`);
-      setMessages(data);
-      setLoading(false);
+      try {
+        const { data } = await axios.get(`/messages/${societyId}`);
+        setMessages(data);
+      } catch {
+        // handled by axios interceptor
+      } finally {
+        setLoading(false);
+      }
     };
     fetchHistory();
 
@@ -46,25 +51,22 @@ export default function GroupChat({ societyId, currentUserName, currentUserRole 
     socket.emit("join_room", { societyId });
 
     // ── LISTEN FOR NEW MESSAGES ──────────────────────────────────────────────
-    // When server broadcasts "receive_message", append it to the list
-    socket.on("receive_message", (msg) => {
-      setMessages((prev) => [...prev, msg]);
-    });
+    // Named handler references are required so cleanup removes only THIS component's
+    // listeners. socket.off("event") without a reference removes ALL listeners for
+    // that event — risky if the socket is shared. Named refs fix the duplicate-message bug.
+    const handleReceive = (msg) => setMessages((prev) => [...prev, msg]);
+    const handleDelete = ({ messageId }) => setMessages((prev) => prev.filter((msg) => msg._id !== messageId));
 
-    // ── LISTEN FOR DELETED MESSAGES ──────────────────────────────────────────
-    // When server broadcasts "message_deleted", remove it from the list
-    // filter keeps all messages EXCEPT the one with matching _id
-    socket.on("message_deleted", ({ messageId }) => {
-      setMessages((prev) => prev.filter((msg) => msg._id !== messageId));
-    });
+    socket.on("receive_message", handleReceive);
+    socket.on("message_deleted", handleDelete);
 
     // ── CLEANUP ──────────────────────────────────────────────────────────────
     // This runs when component unmounts (user navigates away from chat)
-    // Leaves the room and removes event listeners to prevent memory leaks
+    // Leaves the room and removes only this component's event listeners
     return () => {
       socket.emit("leave_room", { societyId });
-      socket.off("receive_message");
-      socket.off("message_deleted");
+      socket.off("receive_message", handleReceive);
+      socket.off("message_deleted", handleDelete);
     };
   }, [societyId]); // re-run if societyId changes (switching between societies)
 

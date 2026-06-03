@@ -18,6 +18,8 @@ export const deleteAccount = async (req, res) => {
   try {
     if (req.user.role === "student") {
       const student = await Student.findById(req.user.id);
+      // Guard: if the document doesn't exist (stale token after prior deletion), bail early
+      if (!student) return res.status(404).json({ message: "Student not found" });
 
       // Delete student account + their team memberships + their chat messages
       // Promise.all runs all deletions simultaneously (faster than one by one)
@@ -59,11 +61,13 @@ export const getMe = async (req, res) => {
       const student = await Student.findById(req.user.id)
         .select("-password") // never send password to frontend
         .populate("following", "name logo");
+      if (!student) return res.status(404).json({ message: "Student not found" });
       return res.json(student);
     } else {
       // Count how many students follow this society
       const followerCount = await Student.countDocuments({ following: req.user.id });
       const society = await Society.findById(req.user.id).select("-password");
+      if (!society) return res.status(404).json({ message: "Society not found" });
       return res.json({ ...society.toObject(), followerCount });
     }
   } catch (err) {

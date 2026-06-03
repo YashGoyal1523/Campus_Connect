@@ -10,6 +10,12 @@ import Feed from "./Feed";
 import Announcements from "./Announcements";
 import MySocieties from "./MySocieties";
 
+// StudentDashboard — the main shell for all student-facing pages.
+// It renders a fixed top navbar, a fixed left sidebar, and a main content area.
+// The active tab controls which page component is rendered inside the main area.
+
+// navItems drives both the sidebar buttons and the badge state keys.
+// Defined outside the component so the array is never recreated on re-renders.
 const navItems = [
   { id: "feed", label: "Feed", icon: "🏠" },
   { id: "discover", label: "Discover", icon: "🔭" },
@@ -35,10 +41,15 @@ const countNew = (items, section) => {
 };
 
 export default function StudentDashboard() {
+  // active: which sidebar tab is currently selected; determines which component renders
   const [active, setActive] = useState("feed");
+  // badges: a map of tab id → unread count shown as pill badges in the sidebar
   const [badges, setBadges] = useState({ feed: 0, discover: 0, "my-societies": 0, announcements: 0, recruitment: 0, events: 0 });
+  // profileOpen: whether the profile slide-over modal is visible
   const [profileOpen, setProfileOpen] = useState(false);
+  // profile: cached /auth/me response; only fetched once (re-used on subsequent modal opens)
   const [profile, setProfile] = useState(null);
+  // memberships: societies the student is a team member of, shown inside the profile modal
   const [memberships, setMemberships] = useState([]);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -64,6 +75,8 @@ export default function StudentDashboard() {
           axios.get("/team/my-societies"),
         ]);
 
+        // Paginated endpoints return { data: [...], hasMore } — use .data to get the array
+        // my-societies is NOT paginated — returns plain array directly
         setBadges({
           feed: countNew(feedData.data, "feed"),
           discover: countNew(societiesData.data, "discover"),
@@ -89,40 +102,66 @@ export default function StudentDashboard() {
     setBadges((prev) => ({ ...prev, [id]: 0 }));
   };
 
+  // Clears auth state and redirects to the landing page
   const handleLogout = () => {
     logout();
     toast.success("Logged out");
     navigate("/");
   };
 
+  // Opens the profile modal and loads the student's profile + memberships in parallel.
+  // Profile is cached in state so re-opening the modal doesn't trigger another API call.
   const openProfile = async () => {
     setProfileOpen(true);
-    const [{ data: profileData }, { data: membershipsData }] = await Promise.all([
-      // Only fetch profile if not already loaded (avoids re-fetching on every open)
-      profile ? Promise.resolve({ data: profile }) : axios.get("/auth/me"),
-      axios.get("/team/my-societies"),
-    ]);
-    setProfile(profileData);
-    setMemberships(membershipsData);
+    try {
+      const [{ data: profileData }, { data: membershipsData }] = await Promise.all([
+        // Only fetch profile if not already loaded (avoids re-fetching on every open)
+        profile ? Promise.resolve({ data: profile }) : axios.get("/auth/me"),
+        axios.get("/team/my-societies"),
+      ]);
+      setProfile(profileData);
+      setMemberships(membershipsData);
+    } catch {
+      // Close the modal so the user isn't stuck with an infinite spinner
+      setProfileOpen(false);
+      toast.error("Failed to load profile");
+    }
   };
 
+  // Snapshot the current following list before the optimistic update so we can roll back
+  // if the server call fails, keeping UI and server state in sync.
   const handleUnfollow = async (societyId) => {
-    await axios.delete(`/follow/${societyId}`);
+    const previousFollowing = profile.following;
     setProfile((prev) => ({
       ...prev,
       following: prev.following.filter((s) => s._id !== societyId),
     }));
-    toast.success("Unfollowed");
+    try {
+      await axios.delete(`/follow/${societyId}`);
+      toast.success("Unfollowed");
+    } catch {
+      // Rollback the optimistic removal if the server call fails
+      setProfile((prev) => ({ ...prev, following: previousFollowing }));
+      toast.error("Failed to unfollow");
+    }
   };
 
+  // Permanently deletes the account after a confirmation dialog, then logs the user out.
+  // window.confirm is a native browser dialog — no UI library needed for a destructive action.
   const handleDeleteAccount = async () => {
     if (!window.confirm("Are you sure you want to delete your account? This cannot be undone.")) return;
-    await axios.delete("/auth/me");
-    logout();
-    toast.success("Account deleted");
-    navigate("/");
+    try {
+      await axios.delete("/auth/me");
+      logout();
+      toast.success("Account deleted");
+      navigate("/");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to delete account");
+    }
   };
 
+  // Renders the correct page component based on the active sidebar tab.
+  // Each component is independently responsible for its own data fetching.
   const renderSection = () => {
     if (active === "feed") return <Feed />;
     if (active === "discover") return <Discover />;
@@ -133,15 +172,19 @@ export default function StudentDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white flex flex-col">
+    // min-h-screen ensures the background covers the full viewport even on short pages
+    <div className="min-h-screen bg-linear-to-br from-slate-900 via-purple-900 to-slate-900 text-white flex flex-col">
 
-      {/* TOP NAVBAR */}
+      {/* TOP NAVBAR — fixed at the top (z-40) so it stays visible while scrolling.
+          backdrop-blur-md gives a frosted-glass effect over the scrolling content. */}
       <header className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-slate-900/60 backdrop-blur-md fixed top-0 left-0 right-0 z-40">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-400 to-blue-400 flex items-center justify-center font-bold text-lg">C</div>
+          {/* App logo mark */}
+          <div className="w-9 h-9 rounded-xl bg-linear-to-br from-purple-400 to-blue-400 flex items-center justify-center font-bold text-lg">C</div>
           <span className="text-xl font-bold tracking-tight">CampusConnect</span>
         </div>
         <div className="flex items-center gap-4">
+          {/* Profile button: shows first letter of name as avatar; opens profile modal on click */}
           <button onClick={openProfile}
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition">
             <div className="w-7 h-7 rounded-full bg-slate-800 border-2 border-white/20 flex items-center justify-center text-sm font-bold text-white/70">
@@ -156,19 +199,24 @@ export default function StudentDashboard() {
         </div>
       </header>
 
+      {/* pt-16 offsets the content below the fixed navbar (navbar height ≈ 4rem = 64px) */}
       <div className="flex pt-16">
 
-        {/* LEFT SIDEBAR */}
+        {/* LEFT SIDEBAR — fixed on the left (z-30, below navbar z-40).
+            h-[calc(100vh-4rem)] makes it fill the remaining viewport height below the navbar. */}
         <aside className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-56 bg-slate-900/60 backdrop-blur-md border-r border-white/10 flex flex-col py-6 px-3 gap-2 z-30">
           <p className="text-white/30 text-xs font-semibold uppercase tracking-widest px-3 mb-2">Menu</p>
           {navItems.map((item) => (
+            // Active tab gets a gradient highlight; inactive tabs show a hover effect
             <button key={item.id} onClick={() => handleTabChange(item.id)}
               className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition text-left w-full
                 ${active === item.id
-                  ? "bg-gradient-to-r from-purple-500/30 to-blue-500/30 border border-purple-500/40 text-white"
+                  ? "bg-linear-to-r from-purple-500/30 to-blue-500/30 border border-purple-500/40 text-white"
                   : "text-white/50 hover:bg-white/5 hover:text-white"}`}>
               <span className="text-lg">{item.icon}</span>
+              {/* flex-1 pushes the badge pill to the far right */}
               <span className="flex-1">{item.label}</span>
+              {/* Only render the badge pill when there is at least one new item */}
               {badges[item.id] > 0 && (
                 <span className="text-xs bg-purple-500 text-white font-bold px-1.5 py-0.5 rounded-full min-w-5 text-center">
                   {badges[item.id]}
@@ -178,22 +226,25 @@ export default function StudentDashboard() {
           ))}
         </aside>
 
-        {/* MAIN CONTENT */}
+        {/* MAIN CONTENT — ml-56 offsets it by the sidebar width so they don't overlap */}
         <main className="ml-56 flex-1 p-8 min-h-[calc(100vh-4rem)]">
           {renderSection()}
         </main>
 
       </div>
 
-      {/* PROFILE MODAL */}
+      {/* PROFILE MODAL — z-50 sits above navbar (z-40) and sidebar (z-30).
+          Clicking the backdrop (outer div) closes the modal;
+          stopPropagation on the inner panel prevents clicks inside from bubbling out. */}
       {profileOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4"
           onClick={() => setProfileOpen(false)}>
+          {/* Semi-transparent blurred backdrop */}
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
           <div className="relative bg-slate-900 border border-white/10 rounded-3xl w-full max-w-md shadow-2xl overflow-hidden"
             onClick={(e) => e.stopPropagation()}>
 
-            {/* Header gradient */}
+            {/* Gradient header band with avatar initial */}
             <div className="h-28 bg-linear-to-br from-purple-600/40 to-blue-600/40 flex items-center justify-center relative">
               <div className="w-20 h-20 rounded-full bg-slate-800 border-4 border-slate-900 flex items-center justify-center text-3xl font-bold text-white/70 shadow-lg">
                 {profile?.name?.charAt(0).toUpperCase()}
@@ -202,6 +253,7 @@ export default function StudentDashboard() {
                 className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 flex items-center justify-center text-white/60 transition">✕</button>
             </div>
 
+            {/* Inline spinner while profile data is loading; replaced with content once loaded */}
             {!profile ? (
               <div className="flex items-center justify-center py-16">
                 <div className="w-6 h-6 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />
@@ -212,6 +264,8 @@ export default function StudentDashboard() {
                   <p className="text-xl font-bold">{profile.name}</p>
                   <span className="text-xs px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 mt-1 inline-block">Student</span>
                 </div>
+
+                {/* Render info fields from an array to avoid repetitive JSX */}
                 {[
                   { label: "Email", value: profile.email },
                   { label: "College", value: profile.college },
@@ -219,10 +273,12 @@ export default function StudentDashboard() {
                 ].map(({ label, value }) => (
                   <div key={label} className="rounded-xl bg-white/5 border border-white/10 px-4 py-3">
                     <p className="text-white/40 text-xs mb-1">{label}</p>
+                    {/* "—" fallback so the card never looks empty */}
                     <p className="text-sm font-medium">{value || "—"}</p>
                   </div>
                 ))}
-                {/* My Societies */}
+
+                {/* Society memberships — only shown if the student belongs to at least one team */}
                 {memberships.length > 0 && (
                   <div className="rounded-xl bg-white/5 border border-white/10 px-4 py-3">
                     <p className="text-white/40 text-xs mb-3">My Societies ({memberships.length})</p>
@@ -230,9 +286,11 @@ export default function StudentDashboard() {
                       {memberships.map((m) => (
                         <div key={m._id} className="flex items-center justify-between gap-2">
                           <div className="flex items-center gap-2 min-w-0">
+                            {/* Logo or initial fallback */}
                             {m.society?.logo
                               ? <img src={m.society.logo} className="w-7 h-7 rounded-full object-contain bg-slate-800 border border-white/20 shrink-0" />
                               : <div className="w-7 h-7 rounded-full bg-slate-800 border border-white/20 flex items-center justify-center text-xs font-bold text-white/70 shrink-0">{m.society?.name?.charAt(0)}</div>}
+                            {/* truncate prevents long names from overflowing the card */}
                             <span className="text-sm truncate">{m.society?.name}</span>
                           </div>
                           <span className="text-xs px-2 py-0.5 rounded-full border border-white/20 bg-white/5 text-white/50 shrink-0">{m.position}</span>
@@ -242,7 +300,7 @@ export default function StudentDashboard() {
                   </div>
                 )}
 
-                {/* Following list */}
+                {/* Following list — only shown if the student follows at least one society */}
                 {profile.following?.length > 0 && (
                   <div className="rounded-xl bg-white/5 border border-white/10 px-4 py-3">
                     <p className="text-white/40 text-xs mb-3">Following ({profile.following.length})</p>
@@ -265,6 +323,7 @@ export default function StudentDashboard() {
                   </div>
                 )}
 
+                {/* Destructive action placed last so it's not accidentally clicked */}
                 <button onClick={handleDeleteAccount}
                   className="w-full mt-2 py-3 rounded-xl border border-red-500/40 text-red-400 hover:bg-red-500/10 transition text-sm font-medium">
                   Delete Account
