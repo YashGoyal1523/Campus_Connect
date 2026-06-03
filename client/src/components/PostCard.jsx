@@ -10,7 +10,7 @@ export default function PostCard({ post, onClick, onDelete }) {
           : <video src={post.mediaUrl} className="w-full h-full object-cover" />}
       </div>
 
-      {post.caption && <p className="px-3 py-2 text-sm text-white/60 line-clamp-2">{post.caption}</p>}
+      {post.caption && <p className="px-3 py-2 text-sm text-white/60 line-clamp-3">{post.caption}</p>}
 
       {onDelete && (
         <button
