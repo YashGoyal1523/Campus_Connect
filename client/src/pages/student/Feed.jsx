@@ -79,9 +79,9 @@ export default function Feed() {
               </div>
 
               {post.caption && (
-                <div className="px-4 py-3">
+                <div className="px-4 py-3 cursor-pointer" onClick={() => setLightbox(post)}>
                   <span className="text-sm font-semibold mr-2">{post.society?.name}</span>
-                  <span className="text-sm text-white/70">{post.caption}</span>
+                  <span className="text-sm text-white/70 line-clamp-2">{post.caption}</span>
                 </div>
               )}
             </div>

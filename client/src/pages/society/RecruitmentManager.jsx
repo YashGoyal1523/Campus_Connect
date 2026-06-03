@@ -10,6 +10,7 @@ export default function RecruitmentManager() {
   const [form, setForm] = useState({ role: "", description: "", googleFormLink: "", deadline: "" });
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
+  const [selected, setSelected] = useState(null);
 
   const fetchRecruitments = async () => {
     const { data } = await axios.get("/recruitments/my");
@@ -39,6 +40,7 @@ export default function RecruitmentManager() {
   const handleDelete = async (id) => {
     await axios.delete(`/recruitments/${id}`);
     setRecruitments(recruitments.filter((r) => r._id !== id));
+    if (selected?._id === id) setSelected(null);
     toast.success("Recruitment deleted");
   };
 
@@ -76,7 +78,9 @@ export default function RecruitmentManager() {
             const deadline = new Date(r.deadline);
             const daysLeft = Math.ceil((deadline - new Date()) / (1000 * 60 * 60 * 24));
             return (
-              <div key={r._id} className="rounded-xl bg-white/5 border border-white/10 p-3 flex items-start justify-between gap-3">
+              <div key={r._id}
+                className="rounded-xl bg-white/5 border border-white/10 p-3 flex items-start justify-between gap-3 cursor-pointer hover:border-white/20 transition"
+                onClick={() => setSelected(r)}>
                 <div className="min-w-0">
                   <h3 className="font-bold text-sm truncate">{r.role}</h3>
                   <p className="text-white/50 text-xs mt-0.5 line-clamp-2">{r.description}</p>
@@ -87,14 +91,8 @@ export default function RecruitmentManager() {
                     </span>
                     <span className="text-white/30 text-xs">{deadline.toLocaleDateString()}</span>
                   </div>
-                  {r.googleFormLink && (
-                    <a href={toAbsoluteUrl(r.googleFormLink)} target="_blank" rel="noreferrer"
-                      className="inline-block mt-1.5 text-xs text-purple-400 hover:text-purple-300 underline underline-offset-2 transition">
-                      🔗 Form
-                    </a>
-                  )}
                 </div>
-                <button onClick={() => handleDelete(r._id)}
+                <button onClick={(e) => { e.stopPropagation(); handleDelete(r._id); }}
                   className="shrink-0 px-3 py-1.5 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 transition text-xs">
                   Delete
                 </button>
@@ -103,7 +101,52 @@ export default function RecruitmentManager() {
           })}
         </div>
       )}
+
+      {/* Detail modal */}
+      {selected && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center px-4"
+          onClick={() => setSelected(null)}>
+          <div className="bg-slate-900 border border-white/10 rounded-3xl w-full max-w-lg shadow-2xl"
+            onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-start justify-between px-6 pt-6 pb-4 border-b border-white/10">
+              <div>
+                <h2 className="text-xl font-bold">{selected.role}</h2>
+                <div className="flex items-center gap-2 mt-1">
+                  {(() => {
+                    const daysLeft = Math.ceil((new Date(selected.deadline) - new Date()) / (1000 * 60 * 60 * 24));
+                    return (
+                      <span className={`text-xs px-2 py-0.5 rounded-full border
+                        ${daysLeft <= 3 ? "bg-red-500/20 text-red-300 border-red-500/30" : "bg-green-500/20 text-green-300 border-green-500/30"}`}>
+                        {daysLeft <= 0 ? "Closing today" : `${daysLeft}d left`}
+                      </span>
+                    );
+                  })()}
+                  <span className="text-white/30 text-xs">
+                    Deadline: {new Date(selected.deadline).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                  </span>
+                </div>
+              </div>
+              <button onClick={() => setSelected(null)}
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/60 transition shrink-0 ml-3">✕</button>
+            </div>
+            <div className="px-6 py-5">
+              <p className="text-white/70 text-sm leading-relaxed mb-5">{selected.description}</p>
+              <div className="flex gap-3">
+                {selected.googleFormLink && (
+                  <a href={toAbsoluteUrl(selected.googleFormLink)} target="_blank" rel="noreferrer"
+                    className="flex-1 text-center py-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition text-sm">
+                    🔗 View Form
+                  </a>
+                )}
+                <button onClick={() => handleDelete(selected._id)}
+                  className="flex-1 py-2.5 rounded-xl border border-red-500/30 text-red-400 hover:bg-red-500/10 transition text-sm">
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
-
 }

@@ -4,14 +4,13 @@ export default function PostCard({ post, onClick, onDelete }) {
       className={`rounded-2xl overflow-hidden bg-white/5 border border-white/10 hover:border-purple-500/40 transition group relative ${onClick ? "cursor-pointer" : ""}`}
       onClick={onClick}
     >
-      {/* Fixed square container — all posts same size */}
       <div className="aspect-square w-full overflow-hidden">
         {post.mediaType === "image"
           ? <img src={post.mediaUrl} alt={post.caption} className="w-full h-full object-cover" />
           : <video src={post.mediaUrl} className="w-full h-full object-cover" />}
       </div>
 
-      {post.caption && <p className="px-3 py-2 text-sm text-white/60 line-clamp-1">{post.caption}</p>}
+      {post.caption && <p className="px-3 py-2 text-sm text-white/60 line-clamp-2">{post.caption}</p>}
 
       {onDelete && (
         <button

@@ -11,6 +11,7 @@ export default function EventManager() {
   const [poster, setPoster] = useState(null);
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
+  const [selected, setSelected] = useState(null);
 
   const fetchEvents = async () => {
     const { data } = await axios.get("/events/my");
@@ -45,6 +46,7 @@ export default function EventManager() {
   const handleDelete = async (id) => {
     await axios.delete(`/events/${id}`);
     setEvents(events.filter((ev) => ev._id !== id));
+    if (selected?._id === id) setSelected(null);
     toast.success("Event deleted");
   };
 
@@ -87,7 +89,9 @@ export default function EventManager() {
           {events.map((ev) => {
             const date = new Date(ev.date);
             return (
-              <div key={ev._id} className="rounded-xl bg-white/5 border border-white/10 overflow-hidden group relative">
+              <div key={ev._id}
+                className="rounded-xl bg-white/5 border border-white/10 overflow-hidden group relative cursor-pointer hover:border-white/20 transition"
+                onClick={() => setSelected(ev)}>
                 {ev.poster
                   ? <img src={ev.poster} className="w-full h-24 object-contain bg-black" />
                   : <div className="w-full h-24 bg-gradient-to-br from-purple-600/20 to-blue-600/20 flex items-center justify-center text-2xl">🎉</div>}
@@ -98,20 +102,54 @@ export default function EventManager() {
                   <p className="text-purple-300 text-xs mt-0.5">
                     🗓 {date.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
                   </p>
-                  {ev.googleFormLink && (
-                    <a href={toAbsoluteUrl(ev.googleFormLink)} target="_blank" rel="noreferrer"
-                      className="inline-block mt-2 text-xs text-purple-400 hover:text-purple-300 underline underline-offset-2 transition">
-                      🔗 Form
-                    </a>
-                  )}
                 </div>
-                <button onClick={() => handleDelete(ev._id)}
+                <button onClick={(e) => { e.stopPropagation(); handleDelete(ev._id); }}
                   className="absolute top-2 right-2 px-2 py-1 rounded-lg bg-red-500/80 hover:bg-red-500 text-xs font-medium opacity-0 group-hover:opacity-100 transition">
                   Delete
                 </button>
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Detail modal */}
+      {selected && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center px-4"
+          onClick={() => setSelected(null)}>
+          <div className="bg-slate-900 border border-white/10 rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden"
+            onClick={(e) => e.stopPropagation()}>
+            {selected.poster && (
+              <div className="relative w-full h-40 overflow-hidden">
+                <img src={selected.poster} className="absolute inset-0 w-full h-full object-cover scale-110 blur-md opacity-60" aria-hidden="true" />
+                <img src={selected.poster} alt={selected.title} className="relative w-full h-full object-contain" />
+              </div>
+            )}
+            <div className="px-6 py-5">
+              <div className="flex items-start justify-between mb-4">
+                <h2 className="text-xl font-bold">{selected.title}</h2>
+                <button onClick={() => setSelected(null)}
+                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/60 transition shrink-0 ml-3">✕</button>
+              </div>
+              <p className="text-white/70 text-sm leading-relaxed mb-4">{selected.description}</p>
+              <div className="flex flex-col gap-1.5 mb-5 text-sm text-white/50">
+                <p>📍 {selected.venue}</p>
+                <p>🗓 {new Date(selected.date).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}</p>
+              </div>
+              <div className="flex gap-3">
+                {selected.googleFormLink && (
+                  <a href={toAbsoluteUrl(selected.googleFormLink)} target="_blank" rel="noreferrer"
+                    className="flex-1 text-center py-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition text-sm">
+                    🔗 View Form
+                  </a>
+                )}
+                <button onClick={() => handleDelete(selected._id)}
+                  className="flex-1 py-2.5 rounded-xl border border-red-500/30 text-red-400 hover:bg-red-500/10 transition text-sm">
+                  Delete Event
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

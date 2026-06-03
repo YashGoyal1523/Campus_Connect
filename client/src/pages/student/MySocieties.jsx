@@ -53,6 +53,7 @@ export default function MySocieties() {
   const [membersBadge, setMembersBadge] = useState(0);
   const [announcementsBadge, setAnnouncementsBadge] = useState(0);
   const [chatBadge, setChatBadge] = useState(0);
+  const [selectedAnnouncement, setSelectedAnnouncement] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -237,13 +238,15 @@ export default function MySocieties() {
             {announcements.length === 0
               ? <div className="text-center py-16 text-white/30">No team announcements yet.</div>
               : announcements.map((a) => (
-                <div key={a._id} className="rounded-xl bg-white/5 border border-white/10 p-4">
+                <div key={a._id}
+                  className="rounded-xl bg-white/5 border border-white/10 p-4 cursor-pointer hover:border-white/20 transition"
+                  onClick={() => setSelectedAnnouncement(a)}>
                   <div className="flex items-center gap-2 mb-2">
                     <span className="text-xs px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">Internal</span>
                     <span className="text-white/30 text-xs">{timeAgo(a.createdAt)}</span>
                   </div>
                   <h3 className="font-bold text-sm mb-1">{a.title}</h3>
-                  <p className="text-white/60 text-sm leading-relaxed">{a.content}</p>
+                  <p className="text-white/60 text-sm leading-relaxed line-clamp-2">{a.content}</p>
                 </div>
               ))}
           </div>
@@ -254,6 +257,27 @@ export default function MySocieties() {
             currentUserRole="student"
           />
         )}
+
+      {selectedAnnouncement && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center px-4"
+          onClick={() => setSelectedAnnouncement(null)}>
+          <div className="bg-slate-900 border border-white/10 rounded-3xl w-full max-w-lg shadow-2xl"
+            onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-start justify-between px-6 pt-6 pb-4 border-b border-white/10">
+              <div>
+                <span className="text-xs px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">Internal</span>
+                <h2 className="font-bold text-lg mt-2">{selectedAnnouncement.title}</h2>
+              </div>
+              <button onClick={() => setSelectedAnnouncement(null)}
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/60 transition shrink-0 ml-3">✕</button>
+            </div>
+            <div className="px-6 py-5">
+              <p className="text-white/70 text-sm leading-relaxed">{selectedAnnouncement.content}</p>
+              <p className="text-white/30 text-xs mt-4">{timeAgo(selectedAnnouncement.createdAt)}</p>
+            </div>
+          </div>
+        </div>
+      )}
       </div>
     );
   }
