@@ -20,11 +20,16 @@ export default function Feed() {
   const [lightbox, setLightbox] = useState(null);
 
   const fetchData = async (pageNum = 1, append = false) => {
-    const { data } = await axios.get(`/follow/feed?page=${pageNum}&limit=6`);
-    setPosts((prev) => append ? [...prev, ...data.data] : data.data);
-    setHasMore(data.hasMore);
-    setLoading(false);
-    setLoadingMore(false);
+    try {
+      const { data } = await axios.get(`/follow/feed?page=${pageNum}&limit=6`);
+      setPosts((prev) => append ? [...prev, ...data.data] : data.data);
+      setHasMore(data.hasMore);
+    } catch {
+      // error is handled by the axios 401 interceptor; other errors fail silently
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
+    }
   };
 
   useEffect(() => { fetchData(); }, []);

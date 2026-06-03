@@ -20,11 +20,16 @@ export default function PostSection() {
   const { user } = useAuth();
 
   const fetchPosts = async (pageNum = 1, append = false) => {
-    const { data } = await axios.get(`/posts/${user.id}?page=${pageNum}&limit=12`);
-    setPosts((prev) => append ? [...prev, ...data.data] : data.data);
-    setHasMore(data.hasMore);
-    setFetching(false);
-    setLoadingMore(false);
+    try {
+      const { data } = await axios.get(`/posts/${user.id}?page=${pageNum}&limit=12`);
+      setPosts((prev) => append ? [...prev, ...data.data] : data.data);
+      setHasMore(data.hasMore);
+    } catch {
+      // 401s are handled by the axios interceptor; other errors fail silently
+    } finally {
+      setFetching(false);
+      setLoadingMore(false);
+    }
   };
 
   useEffect(() => { fetchPosts(); }, []);

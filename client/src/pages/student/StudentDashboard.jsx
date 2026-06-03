@@ -47,32 +47,34 @@ export default function StudentDashboard() {
   // All 6 requests fire simultaneously using Promise.all (faster than sequential)
   useEffect(() => {
     const fetchBadgeCounts = async () => {
-      const [
-        { data: feedData },
-        { data: societiesData },
-        { data: announcementsData },
-        { data: recruitmentsData },
-        { data: eventsData },
-        { data: mySocietiesData },
-      ] = await Promise.all([
-        axios.get("/follow/feed"),
-        axios.get("/societies"),
-        axios.get("/announcements"),
-        axios.get("/recruitments"),
-        axios.get("/events"),
-        axios.get("/team/my-societies"),
-      ]);
+      try {
+        const [
+          { data: feedData },
+          { data: societiesData },
+          { data: announcementsData },
+          { data: recruitmentsData },
+          { data: eventsData },
+          { data: mySocietiesData },
+        ] = await Promise.all([
+          axios.get("/follow/feed"),
+          axios.get("/societies"),
+          axios.get("/announcements"),
+          axios.get("/recruitments"),
+          axios.get("/events"),
+          axios.get("/team/my-societies"),
+        ]);
 
-      // Paginated endpoints return { data: [...], hasMore } — use .data to get the array
-      // my-societies is NOT paginated — returns plain array directly
-      setBadges({
-        feed: countNew(feedData.data, "feed"),
-        discover: countNew(societiesData.data, "discover"),
-        announcements: countNew(announcementsData.data, "announcements"),
-        recruitment: countNew(recruitmentsData.data, "recruitment"),
-        events: countNew(eventsData.data, "events"),
-        "my-societies": countNew(mySocietiesData, "my-societies"),
-      });
+        setBadges({
+          feed: countNew(feedData.data, "feed"),
+          discover: countNew(societiesData.data, "discover"),
+          announcements: countNew(announcementsData.data, "announcements"),
+          recruitment: countNew(recruitmentsData.data, "recruitment"),
+          events: countNew(eventsData.data, "events"),
+          "my-societies": countNew(mySocietiesData, "my-societies"),
+        });
+      } catch {
+        // badge counts are non-critical — silently ignore failures
+      }
     };
     fetchBadgeCounts();
   }, []);
