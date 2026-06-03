@@ -13,7 +13,6 @@ A full-stack campus community platform where college societies manage their pres
 - Browse and search events, recruitments, and announcements with pagination
 - Real-time group chat with society teams (Socket.io)
 - View team members and internal announcements for societies you belong to
-- Unread badge counters per section (based on last-seen timestamp)
 - Profile modal with following list and society memberships
 
 ### Society
