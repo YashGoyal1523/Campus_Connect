@@ -9,7 +9,7 @@ const toAbsoluteUrl = (url) => url?.startsWith("http") ? url : `https://${url}`;
 
 // EventManager is the society-side panel for creating, viewing,
 // and deleting the society's events. It also supports an optional poster image upload.
-export default function EventManager() {
+const EventManager = () => {
   // events: the list of this society's events fetched from the API
   const [events, setEvents] = useState([]);
   // form: controlled state for all text/date fields in the create-event form
@@ -209,3 +209,5 @@ export default function EventManager() {
     </div>
   );
 }
+
+export default EventManager;

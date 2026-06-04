@@ -9,7 +9,7 @@ import toast from "react-hot-toast";
 // PostSection is the society-side post management panel.
 // It lets the logged-in society upload new image/video posts, view their existing posts
 // in a paginated grid, delete posts, and open posts in a fullscreen lightbox.
-export default function PostSection() {
+const PostSection = () => {
   // posts: the accumulated list of this society's posts across all fetched pages
   const [posts, setPosts] = useState([]);
   // caption: controlled input for the caption of the post being created
@@ -160,3 +160,5 @@ export default function PostSection() {
     </div>
   );
 }
+
+export default PostSection;

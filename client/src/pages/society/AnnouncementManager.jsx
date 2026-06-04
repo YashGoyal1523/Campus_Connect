@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 
 // AnnouncementManager is the society-side panel for creating, viewing,
 // and deleting public announcements that all students can see.
-export default function AnnouncementManager() {
+const AnnouncementManager = () => {
   // announcements: the list of this society's announcements fetched from the server
   const [announcements, setAnnouncements] = useState([]);
   // form: controlled state for the create-announcement form fields (title + content)
@@ -158,3 +158,5 @@ export default function AnnouncementManager() {
     </div>
   );
 }
+
+export default AnnouncementManager;

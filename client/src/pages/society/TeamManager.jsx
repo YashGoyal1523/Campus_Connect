@@ -39,7 +39,7 @@ const POSITION_COLORS = {
 
 // TeamManager is the society-side panel for managing team membership,
 // posting internal (team-only) announcements, and accessing the group chat with team members.
-export default function TeamManager() {
+const TeamManager = () => {
   const { user } = useAuth();
 
   // members: the current list of team members for this society
@@ -333,3 +333,5 @@ export default function TeamManager() {
     </div>
   );
 }
+
+export default TeamManager;

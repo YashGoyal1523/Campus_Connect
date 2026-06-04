@@ -3,7 +3,7 @@
 //   - post: the post data object (mediaType, mediaUrl, caption, _id)
 //   - onClick: optional click handler (e.g., open a lightbox); adds cursor-pointer when provided
 //   - onDelete: optional delete handler; when provided a delete button is shown on hover
-export default function PostCard({ post, onClick, onDelete }) {
+const PostCard = ({ post, onClick, onDelete }) => {
   return (
     // "group" class enables Tailwind's group-hover utilities on child elements (e.g., reveal delete button on hover)
     // The cursor-pointer class is conditionally applied only when an onClick handler exists,
@@ -45,3 +45,5 @@ export default function PostCard({ post, onClick, onDelete }) {
     </div>
   );
 }
+
+export default PostCard;

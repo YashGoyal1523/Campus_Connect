@@ -9,7 +9,7 @@ const toAbsoluteUrl = (url) => url?.startsWith("http") ? url : `https://${url}`;
 
 // Events page: shows a paginated, searchable grid of upcoming campus events.
 // Students can browse, search, and register for events via an external Google Form link.
-export default function Events() {
+const Events = () => {
   // events: the full list of events fetched from the server (grows as pages are loaded)
   const [events, setEvents] = useState([]);
   // loading: true only on the very first fetch — controls the full-page spinner
@@ -195,3 +195,5 @@ export default function Events() {
     </div>
   );
 }
+
+export default Events;

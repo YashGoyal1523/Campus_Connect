@@ -14,7 +14,7 @@ const timeAgo = (date) => {
 
 // Announcements page: shows a paginated, searchable feed of public announcements
 // posted by all societies on campus. Students can click any announcement to read the full content.
-export default function Announcements() {
+const Announcements = () => {
   // announcements: the accumulated list fetched from the server
   const [announcements, setAnnouncements] = useState([]);
   // loading: true only during the initial page load — shows the full-page spinner
@@ -164,3 +164,5 @@ export default function Announcements() {
     </div>
   );
 }
+
+export default Announcements;

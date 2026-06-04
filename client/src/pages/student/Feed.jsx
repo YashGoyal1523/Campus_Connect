@@ -17,7 +17,7 @@ const timeAgo = (date) => {
 
 // Feed displays a paginated, chronological list of posts from societies
 // that the logged-in student follows. It also supports opening a post in a lightbox.
-export default function Feed() {
+const Feed = () => {
   // posts: the array of post objects fetched from the server
   const [posts, setPosts] = useState([]);
   // loading: true only during the very first fetch — shows a full-page spinner
@@ -143,3 +143,5 @@ export default function Feed() {
     </div>
   );
 }
+
+export default Feed;

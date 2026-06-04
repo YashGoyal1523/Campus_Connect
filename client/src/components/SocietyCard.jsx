@@ -4,7 +4,7 @@
 //   - onClick: opens the society detail modal when the card is clicked
 //   - isFollowing: boolean — whether the logged-in student already follows this society
 //   - onToggleFollow: optional; when provided a Follow/Unfollow button is rendered inside the card
-export default function SocietyCard({ society, onClick, isFollowing, onToggleFollow }) {
+const SocietyCard = ({ society, onClick, isFollowing, onToggleFollow }) => {
   return (
     // flex flex-col lets the card grow vertically and keeps the footer (follow button) pinned to the bottom
     <div
@@ -65,3 +65,5 @@ export default function SocietyCard({ society, onClick, isFollowing, onToggleFol
     </div>
   );
 }
+
+export default SocietyCard;

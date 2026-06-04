@@ -25,7 +25,7 @@ const navItems = [
 // It renders the fixed navbar, the persistent left sidebar, and a dynamic main content area.
 // The active sidebar item controls which child component (PostSection, EventManager, etc.) is shown.
 // It also owns the Profile modal, which societies use to view their public profile and delete their account.
-export default function SocietyDashboard() {
+const SocietyDashboard = () => {
   // active: the id of the currently selected sidebar item; determines what renderSection() returns
   const [active, setActive] = useState("posts");
   // profileOpen: controls whether the profile modal overlay is visible
@@ -257,3 +257,5 @@ export default function SocietyDashboard() {
     </div>
   );
 }
+
+export default SocietyDashboard;

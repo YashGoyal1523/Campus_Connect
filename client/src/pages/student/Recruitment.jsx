@@ -9,7 +9,7 @@ const toAbsoluteUrl = (url) => url?.startsWith("http") ? url : `https://${url}`;
 
 // Recruitment page: shows a paginated, searchable list of open society recruitment postings.
 // Students can read descriptions and apply via an external Google Form link.
-export default function Recruitment() {
+const Recruitment = () => {
   // recruitments: accumulated list of postings fetched from the server
   const [recruitments, setRecruitments] = useState([]);
   // loading: controls the full-page spinner shown only on the very first fetch
@@ -174,3 +174,5 @@ export default function Recruitment() {
     </div>
   );
 }
+
+export default Recruitment;

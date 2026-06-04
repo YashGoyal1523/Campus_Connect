@@ -15,7 +15,7 @@ const CATEGORIES = ["All", "Technical", "Cultural", "Sports", "Music", "Dance",
 
 // Discover page: lets students browse all societies, filter by category/search,
 // view a society's profile and posts in a modal, and follow/unfollow societies.
-export default function Discover() {
+const Discover = () => {
   // societies: the accumulated list fetched from the server across all loaded pages
   const [societies, setSocieties] = useState([]);
   // selected: the society whose detail modal is currently open; null = no modal
@@ -272,3 +272,5 @@ export default function Discover() {
     </div>
   );
 }
+
+export default Discover;

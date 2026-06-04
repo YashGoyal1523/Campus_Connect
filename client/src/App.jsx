@@ -88,7 +88,7 @@ const PublicRoute = ({ children }) => {
 //     nested sub-routes internally (e.g. /student/discover, /student/events).
 //   - "/society/*" follows the same pattern for SocietyDashboard.
 //   - All dashboard routes are wrapped in ProtectedRoute with the appropriate role.
-function App() {
+const App = () => {
   return (
     <Routes>
       {/* Landing page — public, but redirects authenticated users to their dashboard */}

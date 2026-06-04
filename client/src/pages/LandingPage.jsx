@@ -17,7 +17,7 @@ import { useAuth } from "../context/AuthContext";
 import axios from "../utils/axios"; // pre-configured axios instance with base URL
 import toast from "react-hot-toast"; // lightweight toast notification library
 
-export default function LandingPage() {
+const LandingPage = () => {
   // modal tracks which user type's form is currently open: "student", "society", or null (closed)
   const [modal, setModal] = useState(null); // "student" | "society" | null
 
@@ -327,3 +327,5 @@ export default function LandingPage() {
     </div>
   );
 }
+
+export default LandingPage;

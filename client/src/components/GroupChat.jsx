@@ -20,7 +20,7 @@ const timeAgo = (date) => {
 // societyId — which society's chat room to connect to
 // currentUserName — to identify which messages are "mine" (right-aligned)
 // currentUserRole — "student" or "society" (society can delete any message)
-export default function GroupChat({ societyId, currentUserName, currentUserRole }) {
+const GroupChat = ({ societyId, currentUserName, currentUserRole }) => {
   const [messages, setMessages] = useState([]);  // all messages in this chat
   const [input, setInput] = useState("");         // text input value
   const [file, setFile] = useState(null);         // selected media file (before upload)
@@ -237,3 +237,5 @@ export default function GroupChat({ societyId, currentUserName, currentUserRole 
     </div>
   );
 }
+
+export default GroupChat;

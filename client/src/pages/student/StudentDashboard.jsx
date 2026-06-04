@@ -25,7 +25,7 @@ const navItems = [
   { id: "events", label: "Events", icon: "🎉" },
 ];
 
-export default function StudentDashboard() {
+const StudentDashboard = () => {
   // active: which sidebar tab is currently selected; determines which component renders
   const [active, setActive] = useState("feed");
   // profileOpen: whether the profile slide-over modal is visible
@@ -262,3 +262,5 @@ export default function StudentDashboard() {
     </div>
   );
 }
+
+export default StudentDashboard;

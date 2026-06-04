@@ -34,7 +34,7 @@ const POSITION_COLORS = {
 // It has two views:
 //   Grid view: a card for each membership.
 //   Detail view: tabs for Members, Announcements, and Group Chat within a selected society.
-export default function MySocieties() {
+const MySocieties = () => {
   const { user } = useAuth();
 
   // memberships: the student's society memberships (each has a .society object and .position)
@@ -294,3 +294,5 @@ export default function MySocieties() {
     </div>
   );
 }
+
+export default MySocieties;

@@ -9,7 +9,7 @@ const toAbsoluteUrl = (url) => url?.startsWith("http") ? url : `https://${url}`;
 
 // RecruitmentManager is the society-side panel for posting, viewing,
 // and deleting recruitment openings. It also shows a countdown badge per opening.
-export default function RecruitmentManager() {
+const RecruitmentManager = () => {
   // recruitments: the list of this society's recruitment postings
   const [recruitments, setRecruitments] = useState([]);
   // form: controlled state object for all fields in the create-recruitment form
@@ -195,3 +195,5 @@ export default function RecruitmentManager() {
     </div>
   );
 }
+
+export default RecruitmentManager;
