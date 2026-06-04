@@ -19,4 +19,5 @@ const societySchema = new mongoose.Schema({
 // timestamps: true automatically adds createdAt and updatedAt fields
 }, { timestamps: true });
 
-export default mongoose.model("Society", societySchema);
+const Society = mongoose.models.Society || mongoose.model("Society", societySchema);
+export default Society;

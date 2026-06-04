@@ -10,4 +10,5 @@ const announcementSchema = new mongoose.Schema({
 // timestamps: true gives us createdAt, used for sorting and "time ago" display
 }, { timestamps: true });
 
-export default mongoose.model("Announcement", announcementSchema);
+const Announcement = mongoose.models.Announcement || mongoose.model("Announcement", announcementSchema);
+export default Announcement;

@@ -25,8 +25,8 @@ import {
   getPostsBySociety,
   deletePost,
 } from "../controllers/postController.js";
-import verifyToken from "../middleware/authMiddleware.js"; // JWT validation
-import verifyRole from "../middleware/roleMiddleware.js"; // role-based access guard
+import verifyToken from "../middlewares/authMiddleware.js"; // JWT validation
+import verifyRole from "../middlewares/roleMiddleware.js"; // role-based access guard
 import { upload } from "../utils/cloudinary.js"; // multer instance for file parsing
 
 const router = express.Router();

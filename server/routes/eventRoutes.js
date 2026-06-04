@@ -26,8 +26,8 @@ import {
   getEventsBySociety,
   deleteEvent,
 } from "../controllers/eventController.js";
-import verifyToken from "../middleware/authMiddleware.js"; // JWT validation
-import verifyRole from "../middleware/roleMiddleware.js"; // role-based access guard
+import verifyToken from "../middlewares/authMiddleware.js"; // JWT validation
+import verifyRole from "../middlewares/roleMiddleware.js"; // role-based access guard
 import { upload } from "../utils/cloudinary.js"; // multer for optional poster image
 
 const router = express.Router();

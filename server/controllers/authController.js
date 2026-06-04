@@ -7,7 +7,7 @@ import Announcement from "../models/AnnouncementModel.js";
 import Message from "../models/MessageModel.js";
 import TeamMember from "../models/TeamMemberModel.js";
 import TeamAnnouncement from "../models/TeamAnnouncementModel.js";
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { uploadToCloudinary } from "../utils/cloudinary.js";
 
@@ -87,6 +87,11 @@ export const registerStudent = async (req, res) => {
     // bcrypt.hash converts plain password to a secure hash
     // 10 = number of salt rounds (higher = more secure but slower)
     const hashedPassword = await bcrypt.hash(password, 10);
+//note:
+//const hashedPassword = await bcrypt.hash(password, 10);
+//here Internally bcrypt does:
+// const salt = await bcrypt.genSalt(10);
+// const hashedPassword = await bcrypt.hash(password, salt);
 
     const student = await Student.create({ name, email, password: hashedPassword, college, rollNo });
 

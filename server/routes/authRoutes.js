@@ -29,7 +29,7 @@ import {
   deleteAccount,
 } from "../controllers/authController.js";
 import { upload } from "../utils/cloudinary.js"; // multer instance configured for memory storage
-import verifyToken from "../middleware/authMiddleware.js"; // JWT verification middleware
+import verifyToken from "../middlewares/authMiddleware.js"; // JWT verification middleware
 
 const router = express.Router();
 

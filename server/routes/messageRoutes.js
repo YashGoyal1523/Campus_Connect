@@ -27,7 +27,7 @@ import express from "express";
 import Message from "../models/MessageModel.js"; // Mongoose model for chat messages
 import TeamMember from "../models/TeamMemberModel.js"; // model for society team membership
 import Student from "../models/StudentModel.js"; // model for student profiles (to look up rollNo)
-import verifyToken from "../middleware/authMiddleware.js"; // JWT validation
+import verifyToken from "../middlewares/authMiddleware.js"; // JWT validation
 import { upload, uploadToCloudinary } from "../utils/cloudinary.js"; // multer + Cloudinary upload helper
 
 const router = express.Router();

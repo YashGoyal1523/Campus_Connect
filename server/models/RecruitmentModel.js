@@ -13,4 +13,5 @@ const recruitmentSchema = new mongoose.Schema({
   deadline:       { type: Date, required: true },
 }, { timestamps: true });
 
-export default mongoose.model("Recruitment", recruitmentSchema);
+const Recruitment = mongoose.models.Recruitment || mongoose.model("Recruitment", recruitmentSchema);
+export default Recruitment;

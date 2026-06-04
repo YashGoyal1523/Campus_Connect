@@ -34,8 +34,8 @@ import {
   postTeamAnnouncement, getTeamAnnouncements, deleteTeamAnnouncement,
   getMySocieties, getSocietyMembers, getSocietyTeamAnnouncements,
 } from "../controllers/teamController.js";
-import verifyToken from "../middleware/authMiddleware.js"; // JWT validation
-import verifyRole from "../middleware/roleMiddleware.js"; // role-based access guard
+import verifyToken from "../middlewares/authMiddleware.js"; // JWT validation
+import verifyRole from "../middlewares/roleMiddleware.js"; // role-based access guard
 
 const router = express.Router();
 

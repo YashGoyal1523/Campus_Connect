@@ -9,4 +9,5 @@ const teamAnnouncementSchema = new mongoose.Schema({
   content: { type: String, required: true },
 }, { timestamps: true });
 
-export default mongoose.model("TeamAnnouncement", teamAnnouncementSchema);
+const TeamAnnouncement = mongoose.models.TeamAnnouncement || mongoose.model("TeamAnnouncement", teamAnnouncementSchema);
+export default TeamAnnouncement;

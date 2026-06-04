@@ -12,4 +12,5 @@ const postSchema = new mongoose.Schema({
   mediaType: { type: String, enum: ["image", "video"], required: true },
 }, { timestamps: true });
 
-export default mongoose.model("Post", postSchema);
+const Post = mongoose.models.Post || mongoose.model("Post", postSchema);
+export default Post;

@@ -11,4 +11,5 @@ const teamMemberSchema = new mongoose.Schema({
   position: { type: String, required: true },  // e.g. "President", "General Member"
 }, { timestamps: true });
 
-export default mongoose.model("TeamMember", teamMemberSchema);
+const TeamMember = mongoose.models.TeamMember || mongoose.model("TeamMember", teamMemberSchema);
+export default TeamMember;
