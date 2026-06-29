@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import { AppContext } from "../../context/AppContext";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -27,6 +27,11 @@ const navItems = [
 
 const StudentDashboard = () => {
   const { user, token, logout, backendUrl } = useContext(AppContext);
+
+  useEffect(() => {
+    document.body.style.overflow = profileOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [profileOpen]);
 
   // active: which sidebar tab is currently selected; determines which component renders
   const [active, setActive] = useState("feed");
