@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import { AppContext } from "../../context/AppContext";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -39,6 +39,11 @@ const SocietyDashboard = () => {
   // lightbox: the post currently open in the fullscreen lightbox inside the profile modal
   const [lightbox, setLightbox] = useState(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    document.body.style.overflow = profileOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [profileOpen]);
 
   // Clears auth state, shows a toast, and redirects to the home/login page
   const handleLogout = () => {
