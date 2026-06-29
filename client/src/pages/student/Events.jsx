@@ -46,6 +46,11 @@ const Events = () => {
     }
   };
 
+  useEffect(() => {
+    document.body.style.overflow = selected ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [selected]);
+
   // Fetch the first page of events as soon as the component mounts
   useEffect(() => { fetchData(); }, []);
 
@@ -167,16 +172,16 @@ const Events = () => {
       {selected && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center px-4"
           onClick={() => setSelected(null)}>
-          <div className="bg-slate-900 border border-white/10 rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden"
+          <div className="bg-slate-900 border border-white/10 rounded-3xl w-full max-w-lg max-h-[85vh] flex flex-col shadow-2xl overflow-hidden"
             onClick={(e) => e.stopPropagation()}>
             {selected.poster && (
-              <div className="relative w-full h-40 overflow-hidden">
+              <div className="relative w-full h-40 overflow-hidden shrink-0">
                 {/* Same blurred backdrop technique as the card, but larger for the modal */}
                 <img src={selected.poster} className="absolute inset-0 w-full h-full object-cover scale-110 blur-md opacity-60" aria-hidden="true" />
                 <img src={selected.poster} alt={selected.title} className="relative w-full h-full object-contain" />
               </div>
             )}
-            <div className="px-6 py-5">
+            <div className="px-6 py-5 overflow-y-auto">
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <h2 className="text-xl font-bold">{selected.title}</h2>

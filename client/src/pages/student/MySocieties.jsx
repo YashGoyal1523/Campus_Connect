@@ -56,6 +56,11 @@ const MySocieties = () => {
   // selectedAnnouncement: the announcement open in the inner announcement modal
   const [selectedAnnouncement, setSelectedAnnouncement] = useState(null);
 
+  useEffect(() => {
+    document.body.style.overflow = selectedAnnouncement ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [selectedAnnouncement]);
+
   // On mount: fetch the student's society memberships
   useEffect(() => {
     const fetchData = async () => {
@@ -238,7 +243,7 @@ const MySocieties = () => {
       {selectedAnnouncement && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center px-4"
           onClick={() => setSelectedAnnouncement(null)}>
-          <div className="bg-slate-900 border border-white/10 rounded-3xl w-full max-w-lg shadow-2xl"
+          <div className="bg-slate-900 border border-white/10 rounded-3xl w-full max-w-lg max-h-[85vh] flex flex-col shadow-2xl"
             onClick={(e) => e.stopPropagation()}>
             <div className="flex items-start justify-between px-6 pt-6 pb-4 border-b border-white/10">
               <div>
@@ -248,7 +253,7 @@ const MySocieties = () => {
               <button onClick={() => setSelectedAnnouncement(null)}
                 className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/60 transition shrink-0 ml-3">✕</button>
             </div>
-            <div className="px-6 py-5">
+            <div className="px-6 py-5 overflow-y-auto">
               <p className="text-white/70 text-sm leading-relaxed">{selectedAnnouncement.content}</p>
               <p className="text-white/30 text-xs mt-4">{timeAgo(selectedAnnouncement.createdAt)}</p>
             </div>

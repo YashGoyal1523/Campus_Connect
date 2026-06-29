@@ -202,9 +202,7 @@ const SocietyDashboard = () => {
                 <div className="w-6 h-6 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />
               </div>
             ) : (
-              // flex-1 + overflow-y-auto lets this section scroll independently while
-              // the header remains visible at the top
-              <div className="overflow-y-auto flex-1 px-6 py-6 flex flex-col gap-4">
+              <div className="flex-1 px-6 py-6 flex flex-col gap-4">
                 {/* Society identity: name, category badge, follower count */}
                 <div className="text-center mb-2">
                   <p className="text-xl font-bold">{profile.name}</p>
@@ -247,7 +245,7 @@ const SocietyDashboard = () => {
                   {posts.length === 0 ? (
                     <p className="text-white/30 text-sm text-center py-6">No posts yet.</p>
                   ) : (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-48 overflow-y-auto">
                       {posts.map((post) => (
                         // onDelete is passed so the society can delete posts directly from the profile modal
                         <PostCard key={post._id} post={post} onClick={() => setLightbox(post)} onDelete={deletePost} />

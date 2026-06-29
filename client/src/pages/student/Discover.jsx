@@ -65,6 +65,11 @@ const Discover = () => {
     }
   };
 
+  useEffect(() => {
+    document.body.style.overflow = selected ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [selected]);
+
   // Populate the page on initial mount
   useEffect(() => { fetchSocieties(); }, []);
 

@@ -176,11 +176,11 @@ const StudentDashboard = () => {
           onClick={() => setProfileOpen(false)}>
           {/* Semi-transparent blurred backdrop */}
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-          <div className="relative bg-slate-900 border border-white/10 rounded-3xl w-full max-w-md shadow-2xl overflow-hidden"
+          <div className="relative bg-slate-900 border border-white/10 rounded-3xl w-full max-w-md max-h-[85vh] flex flex-col shadow-2xl overflow-hidden"
             onClick={(e) => e.stopPropagation()}>
 
             {/* Gradient header band with avatar initial */}
-            <div className="h-28 bg-linear-to-br from-purple-600/40 to-blue-600/40 flex items-center justify-center relative">
+            <div className="h-28 bg-linear-to-br from-purple-600/40 to-blue-600/40 flex items-center justify-center relative shrink-0">
               <div className="w-20 h-20 rounded-full bg-slate-800 border-4 border-slate-900 flex items-center justify-center text-3xl font-bold text-white/70 shadow-lg">
                 {profile?.name?.charAt(0).toUpperCase()}
               </div>
@@ -217,7 +217,7 @@ const StudentDashboard = () => {
                 {memberships.length > 0 && (
                   <div className="rounded-xl bg-white/5 border border-white/10 px-4 py-3">
                     <p className="text-white/40 text-xs mb-3">My Societies ({memberships.length})</p>
-                    <div className="flex flex-col gap-2 max-h-48 overflow-y-auto">
+                    <div className="flex flex-col gap-2 max-h-40 overflow-y-auto">
                       {memberships.map((m) => (
                         <div key={m._id} className="flex items-center justify-between gap-2">
                           <div className="flex items-center gap-2 min-w-0">
@@ -237,7 +237,7 @@ const StudentDashboard = () => {
                 {profile.following?.length > 0 && (
                   <div className="rounded-xl bg-white/5 border border-white/10 px-4 py-3">
                     <p className="text-white/40 text-xs mb-3">Following ({profile.following.length})</p>
-                    <div className="flex flex-col gap-2 max-h-48 overflow-y-auto">
+                    <div className="flex flex-col gap-2 max-h-40 overflow-y-auto">
                       {profile.following.map((s) => (
                         <div key={s._id} className="flex items-center justify-between gap-2">
                           <div className="flex items-center gap-2">

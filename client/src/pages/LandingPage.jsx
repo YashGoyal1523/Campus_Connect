@@ -11,7 +11,7 @@
 // them away from this page automatically.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppContext } from "../context/AppContext";
 import axios from "axios";
@@ -48,6 +48,11 @@ const LandingPage = () => {
 
   // useNavigate gives us programmatic navigation after a successful auth action
   const navigate = useNavigate();
+
+  useEffect(() => {
+    document.body.style.overflow = modal ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [modal]);
 
   // openModal — called when the user clicks "Student Login" or "Society Login"
   // Resets all form state so stale data from a previous session is cleared,
@@ -230,7 +235,7 @@ const LandingPage = () => {
           onClick={closeModal}>
           {/* stopPropagation prevents the backdrop click handler from firing
               when the user clicks anywhere inside the card */}
-          <div className="bg-slate-900 border border-white/10 rounded-3xl p-8 w-full max-w-md shadow-2xl"
+          <div className="bg-slate-900 border border-white/10 rounded-3xl p-8 w-full max-w-md max-h-[85vh] overflow-y-auto shadow-2xl"
             onClick={(e) => e.stopPropagation()}>
 
             {/* ── Modal Header ──────────────────────────────────────────────── */}

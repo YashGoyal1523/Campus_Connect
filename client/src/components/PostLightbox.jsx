@@ -6,6 +6,11 @@ import { useEffect } from "react";
 //   - post: the post object to display (mediaType, mediaUrl, caption)
 //   - onClose: callback to close the lightbox (clears the parent's lightbox state)
 const PostLightbox = ({ post, onClose }) => {
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = ""; };
+  }, []);
+
   // Attach a global keyboard listener so pressing Escape closes the lightbox,
   // which is standard UX for any modal or overlay — users expect it
   useEffect(() => {

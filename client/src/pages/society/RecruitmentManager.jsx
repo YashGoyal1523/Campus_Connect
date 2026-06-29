@@ -36,6 +36,11 @@ const RecruitmentManager = () => {
     }
   };
 
+  useEffect(() => {
+    document.body.style.overflow = selected ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [selected]);
+
   // Load postings when the component first mounts
   useEffect(() => { fetchRecruitments(); }, []);
 
@@ -157,9 +162,9 @@ const RecruitmentManager = () => {
       {selected && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center px-4"
           onClick={() => setSelected(null)}>
-          <div className="bg-slate-900 border border-white/10 rounded-3xl w-full max-w-lg shadow-2xl"
+          <div className="bg-slate-900 border border-white/10 rounded-3xl w-full max-w-lg max-h-[85vh] flex flex-col shadow-2xl"
             onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-start justify-between px-6 pt-6 pb-4 border-b border-white/10">
+            <div className="flex items-start justify-between px-6 pt-6 pb-4 border-b border-white/10 shrink-0">
               <div>
                 <h2 className="text-xl font-bold">{selected.role}</h2>
                 {/* IIFE (Immediately Invoked Function Expression) is used here to compute
@@ -183,7 +188,7 @@ const RecruitmentManager = () => {
               <button onClick={() => setSelected(null)}
                 className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/60 transition shrink-0 ml-3">✕</button>
             </div>
-            <div className="px-6 py-5">
+            <div className="px-6 py-5 overflow-y-auto">
               {/* Full description without any line clamping */}
               <p className="text-white/70 text-sm leading-relaxed mb-5">{selected.description}</p>
               <div className="flex gap-3">
