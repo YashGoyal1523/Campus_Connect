@@ -28,11 +28,6 @@ const navItems = [
 const StudentDashboard = () => {
   const { user, token, logout, backendUrl } = useContext(AppContext);
 
-  useEffect(() => {
-    document.body.style.overflow = profileOpen ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
-  }, [profileOpen]);
-
   // active: which sidebar tab is currently selected; determines which component renders
   const [active, setActive] = useState("feed");
   // profileOpen: whether the profile slide-over modal is visible
@@ -42,6 +37,11 @@ const StudentDashboard = () => {
   // memberships: societies the student is a team member of, shown inside the profile modal
   const [memberships, setMemberships] = useState([]);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    document.body.style.overflow = profileOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [profileOpen]);
 
   // Clears auth state and redirects to the landing page
   const handleLogout = () => {
