@@ -23,9 +23,9 @@ export const createEvent = async (req, res) => {
       googleFormLink,
       poster,
     });
-    res.status(201).json(event);
+    res.status(201).json({ success: true, data: event });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ success: false, message: err.message });
   }
 };
 
@@ -41,9 +41,9 @@ export const getAllEvents = async (req, res) => {
       .skip(skip)
       .limit(limit);
 
-    res.json({ data: events, hasMore: page * limit < total });
+    res.json({ success: true, data: events, hasMore: page * limit < total });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ success: false, message: err.message });
   }
 };
 
@@ -52,9 +52,9 @@ export const getAllEvents = async (req, res) => {
 export const getEventsBySociety = async (req, res) => {
   try {
     const events = await Event.find({ society: req.user.id }).sort({ date: 1 });
-    res.json(events);
+    res.json({ success: true, data: events });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ success: false, message: err.message });
   }
 };
 
@@ -62,15 +62,15 @@ export const getEventsBySociety = async (req, res) => {
 export const deleteEvent = async (req, res) => {
   try {
     const event = await Event.findById(req.params.id);
-    if (!event) return res.status(404).json({ message: "Event not found" });
+    if (!event) return res.status(404).json({ success: false, message: "Event not found" });
 
     // Only the society that created this event can delete it
     if (event.society.toString() !== req.user.id)
-      return res.status(403).json({ message: "Not authorized" });
+      return res.status(403).json({ success: false, message: "Not authorized" });
 
     await event.deleteOne();
-    res.json({ message: "Event deleted" });
+    res.json({ success: true, message: "Event deleted" });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ success: false, message: err.message });
   }
 };

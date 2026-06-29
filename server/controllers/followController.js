@@ -11,9 +11,9 @@ export const followSociety = async (req, res) => {
       req.user.id,
       { $addToSet: { following: req.params.societyId } }
     );
-    res.json({ message: "Followed" });
+    res.json({ success: true, message: "Followed" });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ success: false, message: err.message });
   }
 };
 
@@ -26,9 +26,9 @@ export const unfollowSociety = async (req, res) => {
       req.user.id,
       { $pull: { following: req.params.societyId } }
     );
-    res.json({ message: "Unfollowed" });
+    res.json({ success: true, message: "Unfollowed" });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ success: false, message: err.message });
   }
 };
 
@@ -40,7 +40,7 @@ export const getFeed = async (req, res) => {
     const { page, limit, skip } = getPagination(req.query);
 
     const student = await Student.findById(req.user.id);
-    if (!student) return res.status(404).json({ message: "Student not found" });
+    if (!student) return res.status(404).json({ success: false, message: "Student not found" });
 
     // $in operator — fetch posts where society field matches ANY id in the following array
     // This is how we get posts from ALL followed societies in one query
@@ -51,8 +51,8 @@ export const getFeed = async (req, res) => {
       .skip(skip)
       .limit(limit);
 
-    res.json({ data: posts, hasMore: page * limit < total });
+    res.json({ success: true, data: posts, hasMore: page * limit < total });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ success: false, message: err.message });
   }
 };

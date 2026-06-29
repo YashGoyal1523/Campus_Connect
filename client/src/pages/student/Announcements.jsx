@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
-import axios from "../../utils/axios";
-import Spinner from "../../components/Spinner";
+import { useEffect, useState, useContext } from "react";
+import axios from "axios";
+import { AppContext } from "../../context/AppContext";
+import { toast } from "react-hot-toast";
 
 // Converts a UTC date to a human-readable relative time string.
 // Defined outside the component so the function reference is stable across renders.
@@ -15,9 +16,11 @@ const timeAgo = (date) => {
 // Announcements page: shows a paginated, searchable feed of public announcements
 // posted by all societies on campus. Students can click any announcement to read the full content.
 const Announcements = () => {
+  const { token , backendUrl } = useContext(AppContext);
+
   // announcements: the accumulated list fetched from the server
   const [announcements, setAnnouncements] = useState([]);
-  // loading: true only during the initial page load — shows the full-page spinner
+  // loading: true only during the initial page load — shows the full-page skeleton
   const [loading, setLoading] = useState(true);
   // loadingMore: prevents duplicate Load More requests while one is already in-flight
   const [loadingMore, setLoadingMore] = useState(false);
@@ -35,12 +38,12 @@ const Announcements = () => {
   // When append=false the list is replaced from scratch (initial load).
   const fetchData = async (pageNum = 1, append = false) => {
     try {
-      const { data } = await axios.get(`/announcements?page=${pageNum}&limit=8`);
+      const { data } = await axios.get(backendUrl + `/api/announcements?page=${pageNum}&limit=8`, { headers: { token } });
+      if (!data.success) { toast.error(data.message); return; }
       setAnnouncements((prev) => append ? [...prev, ...data.data] : data.data);
       setHasMore(data.hasMore);
-    } catch {
-      // 401 errors are handled globally by the axios interceptor (redirect to login).
-      // Other network errors fail silently — the existing list stays visible.
+    } catch (e) {
+      toast.error(e.response?.data?.message || e.message);
     } finally {
       // finally block always clears the spinners, even if the request threw an error
       setLoading(false);
@@ -59,7 +62,13 @@ const Announcements = () => {
     fetchData(nextPage, true);
   };
 
-  if (loading) return <Spinner />;
+  if (loading) return (
+    <div className="flex flex-col gap-4">
+      {[...Array(4)].map((_, i) => (
+        <div key={i} className="bg-white/5 rounded-xl h-24 animate-pulse" />
+      ))}
+    </div>
+  );
 
   // Client-side filter: runs synchronously on each render using the current search string.
   // Using startsWith rather than includes keeps results tightly focused —

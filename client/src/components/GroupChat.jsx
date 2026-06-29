@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useContext } from "react";
 import { io } from "socket.io-client";
-import axios from "../utils/axios";
-import toast from "react-hot-toast";
+import axios from "axios";
+import { AppContext } from "../context/AppContext";
+import { toast } from "react-hot-toast";
 
 // Connect to the Socket.io server
 // Falls back to localhost if env variable not set
@@ -21,6 +22,8 @@ const timeAgo = (date) => {
 // currentUserName — to identify which messages are "mine" (right-aligned)
 // currentUserRole — "student" or "society" (society can delete any message)
 const GroupChat = ({ societyId, currentUserName, currentUserRole }) => {
+  const { token , backendUrl } = useContext(AppContext);
+
   const [messages, setMessages] = useState([]);  // all messages in this chat
   const [input, setInput] = useState("");         // text input value
   const [file, setFile] = useState(null);         // selected media file (before upload)
@@ -28,17 +31,17 @@ const GroupChat = ({ societyId, currentUserName, currentUserRole }) => {
   const [loading, setLoading] = useState(true);      // true while fetching history
   const bottomRef = useRef(null);     // ref to the bottom of message list (for auto-scroll)
   const fileInputRef = useRef(null);  // ref to hidden file input (triggered by attach button)
-  const token = localStorage.getItem("token"); // JWT token sent with socket events for auth
 
   useEffect(() => {
     // ── LOAD CHAT HISTORY ────────────────────────────────────────────────────
     // Fetch all previous messages from MongoDB via REST API
     const fetchHistory = async () => {
       try {
-        const { data } = await axios.get(`/messages/${societyId}`);
-        setMessages(data);
-      } catch {
-        // handled by axios interceptor
+        const { data } = await axios.get(backendUrl + `/api/messages/${societyId}`, { headers: { token } });
+        if (!data.success) { toast.error(data.message); return; }
+        setMessages(data.data);
+      } catch (e) {
+        toast.error(e.response?.data?.message || e.message);
       } finally {
         setLoading(false);
       }
@@ -90,11 +93,12 @@ const GroupChat = ({ societyId, currentUserName, currentUserRole }) => {
       try {
         const formData = new FormData();
         formData.append("file", file);
-        const { data } = await axios.post("/messages/upload", formData);
+        const { data } = await axios.post(backendUrl + "/api/messages/upload", formData, { headers: { token } });
+        if (!data.success) { toast.error(data.message); setUploading(false); return; }
         attachmentUrl = data.url;   // Cloudinary URL
         attachmentType = data.type; // "image" or "video"
-      } catch (err) {
-        toast.error(err.response?.data?.message || "Upload failed");
+      } catch (e) {
+        toast.error(e.response?.data?.message || e.message);
         setUploading(false);
         return;
       }

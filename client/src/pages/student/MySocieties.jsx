@@ -1,9 +1,8 @@
-import { useEffect, useState } from "react";
-import axios from "../../utils/axios";
-import Spinner from "../../components/Spinner";
+import { useEffect, useState, useContext } from "react";
+import axios from "axios";
+import { AppContext } from "../../context/AppContext";
+import { toast } from "react-hot-toast";
 import GroupChat from "../../components/GroupChat";
-import { useAuth } from "../../context/AuthContext";
-import toast from "react-hot-toast";
 
 // Converts a UTC date string to a relative time string ("2m ago", "1h ago", etc.)
 const timeAgo = (date) => {
@@ -35,7 +34,7 @@ const POSITION_COLORS = {
 //   Grid view: a card for each membership.
 //   Detail view: tabs for Members, Announcements, and Group Chat within a selected society.
 const MySocieties = () => {
-  const { user } = useAuth();
+  const { user, token , backendUrl } = useContext(AppContext);
 
   // memberships: the student's society memberships (each has a .society object and .position)
   const [memberships, setMemberships] = useState([]);
@@ -61,10 +60,11 @@ const MySocieties = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const { data } = await axios.get("/team/my-societies");
-        setMemberships(data);
-      } catch {
-        // 401 handled by interceptor; others fail silently
+        const { data } = await axios.get(backendUrl + "/api/team/my-societies", { headers: { token } });
+        if (!data.success) { toast.error(data.message); return; }
+        setMemberships(data.data);
+      } catch (e) {
+        toast.error(e.response?.data?.message || e.message);
       } finally {
         setLoading(false);
       }
@@ -83,14 +83,16 @@ const MySocieties = () => {
 
     try {
       const [{ data: membersData }, { data: announcementsData }] = await Promise.all([
-        axios.get(`/team/society/${societyId}/members`),
-        axios.get(`/team/society/${societyId}/announcements`),
+        axios.get(backendUrl + `/api/team/society/${societyId}/members`, { headers: { token } }),
+        axios.get(backendUrl + `/api/team/society/${societyId}/announcements`, { headers: { token } }),
       ]);
-      setMembers(membersData);
-      setAnnouncements(announcementsData);
-    } catch {
+      if (!membersData.success) { toast.error(membersData.message); setSelected(null); return; }
+      if (!announcementsData.success) { toast.error(announcementsData.message); setSelected(null); return; }
+      setMembers(membersData.data);
+      setAnnouncements(announcementsData.data);
+    } catch (e) {
       setSelected(null);
-      toast.error("Failed to load society details");
+      toast.error(e.response?.data?.message || e.message);
     } finally {
       setDetailLoading(false);
     }
@@ -103,7 +105,13 @@ const MySocieties = () => {
     setAnnouncements([]);
   };
 
-  if (loading) return <Spinner />;
+  if (loading) return (
+    <div className="flex flex-col gap-4">
+      {[...Array(4)].map((_, i) => (
+        <div key={i} className="bg-white/5 rounded-xl h-24 animate-pulse" />
+      ))}
+    </div>
+  );
 
   /* ── DETAIL VIEW ── */
   if (selected) {
@@ -158,8 +166,14 @@ const MySocieties = () => {
           ))}
         </div>
 
-        {/* Tab content: show a spinner while detail data is loading, then render the active tab */}
-        {detailLoading ? <Spinner /> : tab === "members" ? (
+        {/* Tab content: show a skeleton while detail data is loading, then render the active tab */}
+        {detailLoading ? (
+          <div className="flex flex-col gap-4">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="bg-white/5 rounded-xl h-24 animate-pulse" />
+            ))}
+          </div>
+        ) : tab === "members" ? (
           <div>
             {/* Member search: filters the member list by name, roll no, or position */}
             <input

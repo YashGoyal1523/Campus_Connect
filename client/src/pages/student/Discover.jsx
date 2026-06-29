@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
-import axios from "../../utils/axios";
+import { useEffect, useState, useContext } from "react";
+import axios from "axios";
+import { AppContext } from "../../context/AppContext";
+import { toast } from "react-hot-toast";
 import PostLightbox from "../../components/PostLightbox";
 import PostCard from "../../components/PostCard";
 import SocietyCard from "../../components/SocietyCard";
-import Spinner from "../../components/Spinner";
-import toast from "react-hot-toast";
 
 // Static list of all possible society categories.
 // "All" is the default selection (no filter applied).
@@ -16,13 +16,15 @@ const CATEGORIES = ["All", "Technical", "Cultural", "Sports", "Music", "Dance",
 // Discover page: lets students browse all societies, filter by category/search,
 // view a society's profile and posts in a modal, and follow/unfollow societies.
 const Discover = () => {
+  const { token , backendUrl } = useContext(AppContext);
+
   // societies: the accumulated list fetched from the server across all loaded pages
   const [societies, setSocieties] = useState([]);
   // selected: the society whose detail modal is currently open; null = no modal
   const [selected, setSelected] = useState(null);
   // posts: the posts of the currently selected society, fetched when the modal opens
   const [posts, setPosts] = useState([]);
-  // loading: full-page spinner state for the initial societies fetch
+  // loading: full-page skeleton state for the initial societies fetch
   const [loading, setLoading] = useState(true);
   // loadingMore: disables the Load More button while a page fetch is in progress
   const [loadingMore, setLoadingMore] = useState(false);
@@ -47,15 +49,16 @@ const Discover = () => {
     try {
       // On page > 1 we skip the /auth/me call because we already have the following list
       const [{ data: societiesData }, { data: meData }] = await Promise.all([
-        axios.get(`/societies?page=${pageNum}&limit=9`),
-        pageNum === 1 ? axios.get("/auth/me") : Promise.resolve({ data: null }),
+        axios.get(backendUrl + `/api/societies?page=${pageNum}&limit=9`, { headers: { token } }),
+        pageNum === 1 ? axios.get(backendUrl + "/api/auth/me", { headers: { token } }) : Promise.resolve({ data: null }),
       ]);
+      if (!societiesData.success) { toast.error(societiesData.message); return; }
       setSocieties((prev) => append ? [...prev, ...societiesData.data] : societiesData.data);
       setHasMore(societiesData.hasMore);
       // Extract just the _id values from the following array for easy lookup with .includes()
-      if (meData) setFollowing(meData.following?.map((s) => s._id) || []);
-    } catch {
-      // 401 errors handled by the interceptor; others fail silently
+      if (meData && meData.success) setFollowing(meData.user.following?.map((s) => s._id) || []);
+    } catch (e) {
+      toast.error(e.response?.data?.message || e.message);
     } finally {
       setLoading(false);
       setLoadingMore(false);
@@ -78,10 +81,12 @@ const Discover = () => {
   const openSociety = async (society) => {
     setSelected(society);
     try {
-      const { data } = await axios.get(`/posts/${society._id}`);
+      const { data } = await axios.get(backendUrl + `/api/posts/${society._id}`, { headers: { token } });
+      if (!data.success) { toast.error(data.message); return; }
       // data.data is the posts array from the paginated response; fall back to [] if missing
       setPosts(data.data ?? []);
-    } catch {
+    } catch (e) {
+      toast.error(e.response?.data?.message || e.message);
       setPosts([]);
     }
   };
@@ -104,24 +109,30 @@ const Discover = () => {
     }
     try {
       if (isFollowing) {
-        await axios.delete(`/follow/${societyId}`);
+        await axios.delete(backendUrl + `/api/follow/${societyId}`, { headers: { token } });
         toast.success("Unfollowed");
       } else {
-        await axios.post(`/follow/${societyId}`);
+        await axios.post(backendUrl + `/api/follow/${societyId}`, {}, { headers: { token } });
         toast.success("Following!");
       }
-    } catch {
+    } catch (e) {
       // Roll back the optimistic update so UI matches the server
       if (isFollowing) {
         setFollowing((prev) => [...prev, societyId]);
       } else {
         setFollowing((prev) => prev.filter((id) => id !== societyId));
       }
-      toast.error("Something went wrong");
+      toast.error(e.response?.data?.message || e.message);
     }
   };
 
-  if (loading) return <Spinner />;
+  if (loading) return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+      {[...Array(6)].map((_, i) => (
+        <div key={i} className="bg-white/5 rounded-xl h-48 animate-pulse" />
+      ))}
+    </div>
+  );
 
   // Client-side filtering: combines search text and category chip.
   // Both conditions must pass (AND logic), so users get progressively narrower results
@@ -258,7 +269,7 @@ const Discover = () => {
                 // 2-column grid for posts; clicking a PostCard opens the lightbox on top of the modal
                 <div className="grid grid-cols-2 gap-3">
                   {posts.map((post) => (
-                    <PostCard key={post._id} post={post} height="h-40" onClick={() => setLightbox(post)} />
+                    <PostCard key={post._id} post={post} onClick={() => setLightbox(post)} />
                   ))}
                 </div>
               )}

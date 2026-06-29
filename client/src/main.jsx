@@ -7,8 +7,8 @@ import { createRoot } from "react-dom/client"
 import { BrowserRouter } from "react-router-dom"
 // Toaster renders toast notifications — it sits outside App so toasts show over all pages.
 import { Toaster } from "react-hot-toast"
-// AuthProvider wraps the app so every component can access the logged-in user via useAuth().
-import { AuthProvider } from "./context/AuthContext"
+// AppProvider wraps the app so every component can access the logged-in user via useContext(AppContext).
+import { AppProvider } from "./context/AppContext"
 import "./index.css"
 import App from "./App.jsx"
 
@@ -17,7 +17,7 @@ import App from "./App.jsx"
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
-      <AuthProvider>
+      <AppProvider>
         <App />
         {/* Toaster is positioned bottom-right with custom dark theme to match the app's palette */}
         <Toaster position="bottom-right" toastOptions={{
@@ -25,7 +25,7 @@ createRoot(document.getElementById('root')).render(
           success: { iconTheme: { primary: '#a78bfa', secondary: '#1e1b4b' } },
           error: { iconTheme: { primary: '#f87171', secondary: '#1e1b4b' } },
         }} />
-      </AuthProvider>
+      </AppProvider>
     </BrowserRouter>
   </StrictMode>,
 )

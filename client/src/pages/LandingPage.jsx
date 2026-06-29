@@ -11,13 +11,14 @@
 // them away from this page automatically.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import axios from "../utils/axios"; // pre-configured axios instance with base URL
-import toast from "react-hot-toast"; // lightweight toast notification library
+import { AppContext } from "../context/AppContext";
+import axios from "axios";
+import { toast } from "react-hot-toast";
 
 const LandingPage = () => {
+
   // modal tracks which user type's form is currently open: "student", "society", or null (closed)
   const [modal, setModal] = useState(null); // "student" | "society" | null
 
@@ -39,9 +40,11 @@ const LandingPage = () => {
   // to prevent duplicate submissions
   const [loading, setLoading] = useState(false);
 
-  // login comes from AuthContext — it stores the user object + JWT token globally
+  const [showPassword, setShowPassword] = useState(false);
+
+  // login comes from AppContext — it stores the user object + JWT token globally
   // so every part of the app knows who is logged in
-  const { login } = useAuth();
+  const { login , backendUrl } = useContext(AppContext);
 
   // useNavigate gives us programmatic navigation after a successful auth action
   const navigate = useNavigate();
@@ -55,6 +58,7 @@ const LandingPage = () => {
     setForm({});
     setLogoFile(null);
     setError("");
+    setShowPassword(false);
   };
 
   // closeModal — resets everything and hides the modal
@@ -64,6 +68,7 @@ const LandingPage = () => {
     setForm({});
     setLogoFile(null);
     setError("");
+    setShowPassword(false);
   };
 
   // handleChange — generic controlled-input handler
@@ -82,10 +87,10 @@ const LandingPage = () => {
     setError("");
     try {
       // Build the API endpoint dynamically from the current modal type and mode:
-      //   e.g. "/auth/student/register"  or  "/auth/society/login"
+      //   e.g. "/api/auth/student/register"  or  "/api/auth/society/login"
       const endpoint = isRegister
-        ? `/auth/${modal}/register`
-        : `/auth/${modal}/login`;
+        ? `/api/auth/${modal}/register`
+        : `/api/auth/${modal}/login`;
 
       // For most cases, send the form data as JSON (the default axios behaviour)
       let payload = form;
@@ -104,11 +109,17 @@ const LandingPage = () => {
 
       // Make the POST request; axios automatically sets the correct Content-Type header
       // (application/json for a plain object, multipart/form-data for FormData)
-      const { data } = await axios.post(endpoint, payload);
+      const { data } = await axios.post(backendUrl + endpoint, payload);
 
-      // Store the returned user object and JWT token in global AuthContext
-      // so all other components can read the current user without a new API call
-      login(data.user, data.token);
+      if (!data.success) {
+        const msg = data.message || "Something went wrong";
+        setError(msg);
+        toast.error(msg);
+        return;
+      }
+
+      // Store only the JWT token — AppContext will fetch user data from backend
+      login(data.token);
 
       // Show a friendly success notification
       toast.success(isRegister ? "Account created!" : "Welcome back!");
@@ -116,9 +127,9 @@ const LandingPage = () => {
       // Redirect using the role from the server response (not the modal type)
       // so the route is always correct regardless of which button the user clicked
       navigate(data.user.role === "student" ? "/student/discover" : "/society/posts");
-    } catch (err) {
+    } catch (e) {
       // Prefer the server's error message; fall back to a generic string
-      const msg = err.response?.data?.message || "Something went wrong";
+      const msg = e.response?.data?.message || e.message;
       setError(msg); // show inline inside the form
       toast.error(msg); // also show as a toast for visibility
     } finally {
@@ -298,8 +309,23 @@ const LandingPage = () => {
               {/* Email and password are common to all auth scenarios (login + register, both types) */}
               <input name="email" type="email" placeholder="Email Address" onChange={handleChange} required
                 className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm outline-none focus:border-purple-500 transition placeholder:text-white/30" />
-              <input name="password" type="password" placeholder="Password" onChange={handleChange} required
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm outline-none focus:border-purple-500 transition placeholder:text-white/30" />
+              <div className="relative">
+                <input name="password" type={showPassword ? "text" : "password"} placeholder="Password" onChange={handleChange} required
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 pr-11 text-sm outline-none focus:border-purple-500 transition placeholder:text-white/30" />
+                <button type="button" onClick={() => setShowPassword((p) => !p)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 transition">
+                  {showPassword ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                    </svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                  )}
+                </button>
+              </div>
 
               {/* Inline error message shown when the API returns an error */}
               {error && <p className="text-red-400 text-sm">{error}</p>}
@@ -316,7 +342,7 @@ const LandingPage = () => {
                 opening a new modal. Toggling also clears any existing errors. */}
             <p className="text-center text-white/40 text-sm mt-5">
               {isRegister ? "Already have an account?" : "Don't have an account?"}{" "}
-              <button onClick={() => { setIsRegister(!isRegister); setError(""); }}
+              <button onClick={() => { setIsRegister(!isRegister); setError(""); setShowPassword(false); }}
                 className="text-purple-400 hover:text-purple-300 font-medium transition">
                 {isRegister ? "Login" : "Register"}
               </button>

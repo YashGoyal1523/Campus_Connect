@@ -19,7 +19,7 @@ export const deleteAccount = async (req, res) => {
     if (req.user.role === "student") {
       const student = await Student.findById(req.user.id);
       // Guard: if the document doesn't exist (stale token after prior deletion), bail early
-      if (!student) return res.status(404).json({ message: "Student not found" });
+      if (!student) return res.status(404).json({ success: false, message: "Student not found" });
 
       // Delete student account + their team memberships + their chat messages
       // Promise.all runs all deletions simultaneously (faster than one by one)
@@ -44,9 +44,9 @@ export const deleteAccount = async (req, res) => {
         Student.updateMany({ following: req.user.id }, { $pull: { following: req.user.id } }),
       ]);
     }
-    res.json({ message: "Account deleted" });
+    res.json({ success: true, message: "Account deleted" });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ success: false, message: err.message });
   }
 };
 
@@ -56,22 +56,19 @@ export const deleteAccount = async (req, res) => {
 export const getMe = async (req, res) => {
   try {
     if (req.user.role === "student") {
-      // populate("following") replaces society IDs with actual society objects
-      // so frontend gets name and logo directly instead of just an ID
       const student = await Student.findById(req.user.id)
-        .select("-password") // never send password to frontend
+        .select("-password")
         .populate("following", "name logo");
-      if (!student) return res.status(404).json({ message: "Student not found" });
-      return res.json(student);
+      if (!student) return res.status(404).json({ success: false, message: "Student not found" });
+      return res.json({ success: true, user: { ...student.toObject(), id: student._id, role: "student" } });
     } else {
-      // Count how many students follow this society
       const followerCount = await Student.countDocuments({ following: req.user.id });
       const society = await Society.findById(req.user.id).select("-password");
-      if (!society) return res.status(404).json({ message: "Society not found" });
-      return res.json({ ...society.toObject(), followerCount });
+      if (!society) return res.status(404).json({ success: false, message: "Society not found" });
+      return res.json({ success: true, user: { ...society.toObject(), id: society._id, role: "society", followerCount } });
     }
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ success: false, message: err.message });
   }
 };
 
@@ -82,16 +79,11 @@ export const registerStudent = async (req, res) => {
 
     // Check if email already registered
     const existing = await Student.findOne({ email });
-    if (existing) return res.status(400).json({ message: "Email already registered" });
+    if (existing) return res.status(400).json({ success: false, message: "Email already registered" });
 
     // bcrypt.hash converts plain password to a secure hash
     // 10 = number of salt rounds (higher = more secure but slower)
     const hashedPassword = await bcrypt.hash(password, 10);
-//note:
-//const hashedPassword = await bcrypt.hash(password, 10);
-//here Internally bcrypt does:
-// const salt = await bcrypt.genSalt(10);
-// const hashedPassword = await bcrypt.hash(password, salt);
 
     const student = await Student.create({ name, email, password: hashedPassword, college, rollNo });
 
@@ -103,9 +95,9 @@ export const registerStudent = async (req, res) => {
       { expiresIn: "7d" }
     );
 
-    res.status(201).json({ token, user: { id: student._id, name: student.name, role: "student" } });
+    res.status(201).json({ success: true, token, user: { id: student._id, name: student.name, role: "student" } });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ success: false, message: err.message });
   }
 };
 
@@ -115,11 +107,11 @@ export const loginStudent = async (req, res) => {
     const { email, password } = req.body;
 
     const student = await Student.findOne({ email });
-    if (!student) return res.status(400).json({ message: "Invalid credentials" });
+    if (!student) return res.status(400).json({ success: false, message: "Invalid credentials" });
 
     // bcrypt.compare checks plain password against the stored hash
     const isMatch = await bcrypt.compare(password, student.password);
-    if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
+    if (!isMatch) return res.status(400).json({ success: false, message: "Invalid credentials" });
 
     const token = jwt.sign(
       { id: student._id, role: "student", name: student.name },
@@ -127,9 +119,9 @@ export const loginStudent = async (req, res) => {
       { expiresIn: "7d" }
     );
 
-    res.json({ token, user: { id: student._id, name: student.name, role: "student" } });
+    res.json({ success: true, token, user: { id: student._id, name: student.name, role: "student" } });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ success: false, message: err.message });
   }
 };
 
@@ -139,7 +131,7 @@ export const registerSociety = async (req, res) => {
     const { name, email, password, college, category, description } = req.body;
 
     const existing = await Society.findOne({ email });
-    if (existing) return res.status(400).json({ message: "Email already registered" });
+    if (existing) return res.status(400).json({ success: false, message: "Email already registered" });
 
     let logo = "";
     // If a logo file was uploaded, send it to Cloudinary and get back a URL
@@ -157,9 +149,9 @@ export const registerSociety = async (req, res) => {
       { expiresIn: "7d" }
     );
 
-    res.status(201).json({ token, user: { id: society._id, name: society.name, role: "society", logo: society.logo } });
+    res.status(201).json({ success: true, token, user: { id: society._id, name: society.name, role: "society", logo: society.logo } });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ success: false, message: err.message });
   }
 };
 
@@ -169,10 +161,10 @@ export const loginSociety = async (req, res) => {
     const { email, password } = req.body;
 
     const society = await Society.findOne({ email });
-    if (!society) return res.status(400).json({ message: "Invalid credentials" });
+    if (!society) return res.status(400).json({ success: false, message: "Invalid credentials" });
 
     const isMatch = await bcrypt.compare(password, society.password);
-    if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
+    if (!isMatch) return res.status(400).json({ success: false, message: "Invalid credentials" });
 
     const token = jwt.sign(
       { id: society._id, role: "society", name: society.name },
@@ -180,8 +172,8 @@ export const loginSociety = async (req, res) => {
       { expiresIn: "7d" }
     );
 
-    res.json({ token, user: { id: society._id, name: society.name, role: "society", logo: society.logo } });
+    res.json({ success: true, token, user: { id: society._id, name: society.name, role: "society", logo: society.logo } });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ success: false, message: err.message });
   }
 };

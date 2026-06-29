@@ -1,15 +1,16 @@
-import { useEffect, useState } from "react";
-import axios from "../../utils/axios";
-import { useAuth } from "../../context/AuthContext";
+import { useEffect, useState, useContext } from "react";
+import axios from "axios";
+import { AppContext } from "../../context/AppContext";
+import { toast } from "react-hot-toast";
 import PostLightbox from "../../components/PostLightbox";
 import PostCard from "../../components/PostCard";
-import Spinner from "../../components/Spinner";
-import toast from "react-hot-toast";
 
 // PostSection is the society-side post management panel.
 // It lets the logged-in society upload new image/video posts, view their existing posts
 // in a paginated grid, delete posts, and open posts in a fullscreen lightbox.
 const PostSection = () => {
+  const { user, token , backendUrl } = useContext(AppContext);
+
   // posts: the accumulated list of this society's posts across all fetched pages
   const [posts, setPosts] = useState([]);
   // caption: controlled input for the caption of the post being created
@@ -18,7 +19,7 @@ const PostSection = () => {
   const [file, setFile] = useState(null);
   // loading: true while the upload request is in progress — disables the submit button
   const [loading, setLoading] = useState(false);
-  // fetching: true during the initial posts fetch — shows the inline spinner below the form
+  // fetching: true during the initial posts fetch — shows the inline skeleton below the form
   const [fetching, setFetching] = useState(true);
   // loadingMore: true while fetching additional pages — disables the Load More button
   const [loadingMore, setLoadingMore] = useState(false);
@@ -30,19 +31,18 @@ const PostSection = () => {
   const [error, setError] = useState("");
   // lightbox: the post currently being viewed in the fullscreen lightbox; null = closed
   const [lightbox, setLightbox] = useState(null);
-  // user from AuthContext provides the society's ID for API requests
-  const { user } = useAuth();
 
   // Fetches a page of this society's posts.
   // append=true adds results to the end of the list (Load More).
   // append=false replaces the list (initial fetch or after a new post is uploaded).
   const fetchPosts = async (pageNum = 1, append = false) => {
     try {
-      const { data } = await axios.get(`/posts/${user.id}?page=${pageNum}&limit=12`);
+      const { data } = await axios.get(backendUrl + `/api/posts/${user.id}?page=${pageNum}&limit=12`, { headers: { token } });
+      if (!data.success) { toast.error(data.message); return; }
       setPosts((prev) => append ? [...prev, ...data.data] : data.data);
       setHasMore(data.hasMore);
-    } catch {
-      // 401 errors are handled by the global axios interceptor; others fail silently
+    } catch (e) {
+      toast.error(e.response?.data?.message || e.message);
     } finally {
       // finally runs regardless of success/failure to ensure spinners are cleared
       setFetching(false);
@@ -75,7 +75,8 @@ const PostSection = () => {
     formData.append("caption", caption);
     try {
       setError(""); // Clear any previous error before the new attempt
-      await axios.post("/posts", formData);
+      const { data } = await axios.post(backendUrl + "/api/posts", formData, { headers: { token } });
+      if (!data.success) { toast.error(data.message); return; }
       // Reset all form fields after a successful upload
       setCaption("");
       setFile(null);
@@ -85,9 +86,9 @@ const PostSection = () => {
       // Refresh from page 1 to include the newly uploaded post at the top of the grid
       fetchPosts();
       toast.success("Post uploaded!");
-    } catch (err) {
+    } catch (e) {
       // Extract the server's error message if available, otherwise show a generic fallback
-      const msg = err.response?.data?.message || "Upload failed. Try again.";
+      const msg = e.response?.data?.message || "Upload failed. Try again.";
       setError(msg);
       toast.error(msg);
     } finally {
@@ -100,11 +101,12 @@ const PostSection = () => {
   // Filtering the local array avoids needing a full re-fetch — the grid updates instantly.
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`/posts/${id}`);
+      const { data } = await axios.delete(backendUrl + `/api/posts/${id}`, { headers: { token } });
+      if (!data.success) { toast.error(data.message); return; }
       setPosts((prev) => prev.filter((p) => p._id !== id));
       toast.success("Post deleted");
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to delete");
+    } catch (e) {
+      toast.error(e.response?.data?.message || e.message);
     }
   };
 
@@ -131,7 +133,13 @@ const PostSection = () => {
       </form>
 
       {/* Posts Grid — three separate render branches to handle loading / empty / populated states */}
-      {fetching && <Spinner />}
+      {fetching && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="bg-white/5 rounded-xl h-48 animate-pulse" />
+          ))}
+        </div>
+      )}
       {!fetching && posts.length === 0 && (
         <div className="text-center py-20 text-white/30">No posts yet. Create your first post!</div>
       )}

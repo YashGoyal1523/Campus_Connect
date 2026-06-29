@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
-import axios from "../../utils/axios";
-import Spinner from "../../components/Spinner";
-import toast from "react-hot-toast";
+import { useEffect, useState, useContext } from "react";
+import axios from "axios";
+import { AppContext } from "../../context/AppContext";
+import { toast } from "react-hot-toast";
 
 // Normalises a URL that may be missing the "https://" protocol prefix.
 // Without this, anchor tags would treat bare domains as relative paths.
@@ -10,13 +10,15 @@ const toAbsoluteUrl = (url) => url?.startsWith("http") ? url : `https://${url}`;
 // RecruitmentManager is the society-side panel for posting, viewing,
 // and deleting recruitment openings. It also shows a countdown badge per opening.
 const RecruitmentManager = () => {
+  const { token , backendUrl } = useContext(AppContext);
+
   // recruitments: the list of this society's recruitment postings
   const [recruitments, setRecruitments] = useState([]);
   // form: controlled state object for all fields in the create-recruitment form
   const [form, setForm] = useState({ role: "", description: "", googleFormLink: "", deadline: "" });
   // loading: true while the POST request is in progress — disables the submit button
   const [loading, setLoading] = useState(false);
-  // fetching: true during the initial GET — shows the inline spinner
+  // fetching: true during the initial GET — shows the inline skeleton
   const [fetching, setFetching] = useState(true);
   // selected: the recruitment currently displayed in the detail modal; null = no modal
   const [selected, setSelected] = useState(null);
@@ -24,10 +26,11 @@ const RecruitmentManager = () => {
   // Fetches all recruitment postings owned by the logged-in society
   const fetchRecruitments = async () => {
     try {
-      const { data } = await axios.get("/recruitments/my");
-      setRecruitments(data);
-    } catch {
-      // 401 errors handled globally; others fail silently
+      const { data } = await axios.get(backendUrl + "/api/recruitments/my", { headers: { token } });
+      if (!data.success) { toast.error(data.message); return; }
+      setRecruitments(data.data);
+    } catch (e) {
+      toast.error(e.response?.data?.message || e.message);
     } finally {
       setFetching(false);
     }
@@ -46,14 +49,15 @@ const RecruitmentManager = () => {
     e.preventDefault(); // Prevent default browser form submission
     setLoading(true);
     try {
-      await axios.post("/recruitments", form);
+      const { data } = await axios.post(backendUrl + "/api/recruitments", form, { headers: { token } });
+      if (!data.success) { toast.error(data.message); return; }
       // Reset all form fields so the society can immediately create another posting
       setForm({ role: "", description: "", googleFormLink: "", deadline: "" });
       // Re-fetch to get the server-assigned _id and deadline value for the new item
       fetchRecruitments();
       toast.success("Recruitment posted!");
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to post recruitment");
+    } catch (e) {
+      toast.error(e.response?.data?.message || e.message);
     } finally {
       setLoading(false);
     }
@@ -63,12 +67,13 @@ const RecruitmentManager = () => {
   // Also closes the detail modal if the deleted item was the one currently open.
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`/recruitments/${id}`);
+      const { data } = await axios.delete(backendUrl + `/api/recruitments/${id}`, { headers: { token } });
+      if (!data.success) { toast.error(data.message); return; }
       setRecruitments(recruitments.filter((r) => r._id !== id));
       if (selected?._id === id) setSelected(null);
       toast.success("Recruitment deleted");
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to delete");
+    } catch (e) {
+      toast.error(e.response?.data?.message || e.message);
     }
   };
 
@@ -100,7 +105,13 @@ const RecruitmentManager = () => {
       </form>
 
       {/* Recruitments list — three branches: loading / empty / populated */}
-      {fetching && <Spinner />}
+      {fetching && (
+        <div className="flex flex-col gap-4">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="bg-white/5 rounded-xl h-24 animate-pulse" />
+          ))}
+        </div>
+      )}
       {!fetching && recruitments.length === 0 && (
         <div className="text-center py-20 text-white/30">No recruitments posted yet.</div>
       )}

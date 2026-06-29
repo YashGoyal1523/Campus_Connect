@@ -46,12 +46,11 @@ A full-stack campus community platform where college societies manage their pres
 CampusConnect/
 ├── client/                  # React frontend (Vite)
 │   └── src/
-│       ├── context/         # AuthContext (global auth state)
+│       ├── context/         # AppContext (global auth state + backendUrl)
 │       ├── pages/
 │       │   ├── student/     # Feed, Discover, Events, Recruitment, Announcements, MySocieties
 │       │   └── society/     # PostSection, EventManager, TeamManager, etc.
-│       ├── components/      # GroupChat, PostCard, SocietyCard, Spinner
-│       └── utils/           # axios instance, config
+│       └── components/      # GroupChat, PostCard, PostLightbox, SocietyCard
 │
 └── server/                  # Express backend
     ├── controllers/         # Business logic per feature
@@ -100,7 +99,7 @@ npm install
 
 Create a `.env` file in the `client/` folder:
 ```env
-VITE_API_URL=http://localhost:8000/api
+VITE_BACKEND_URL=http://localhost:8000
 VITE_SOCKET_URL=http://localhost:8000
 ```
 

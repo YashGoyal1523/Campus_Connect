@@ -49,9 +49,9 @@ export const getAllSocieties = async (req, res) => {
       .limit(limit);    // cap the number of documents returned
 
     // hasMore: true if there are still more documents beyond this page
-    res.json({ data: societies, hasMore: page * limit < total });
+    res.json({ success: true, data: societies, hasMore: page * limit < total });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ success: false, message: err.message });
   }
 };
 
@@ -72,11 +72,11 @@ export const getSocietyById = async (req, res) => {
     const society = await Society.findById(req.params.id).select("-password");
 
     // Explicit 404 guard: findById returns null if no document matches
-    if (!society) return res.status(404).json({ message: "Society not found" });
+    if (!society) return res.status(404).json({ success: false, message: "Society not found" });
 
-    res.json(society);
+    res.json({ success: true, data: society });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ success: false, message: err.message });
   }
 };
 

@@ -1,18 +1,20 @@
-import { useEffect, useState } from "react";
-import axios from "../../utils/axios";
-import Spinner from "../../components/Spinner";
-import toast from "react-hot-toast";
+import { useEffect, useState, useContext } from "react";
+import axios from "axios";
+import { AppContext } from "../../context/AppContext";
+import { toast } from "react-hot-toast";
 
 // AnnouncementManager is the society-side panel for creating, viewing,
 // and deleting public announcements that all students can see.
 const AnnouncementManager = () => {
+  const { token , backendUrl } = useContext(AppContext);
+
   // announcements: the list of this society's announcements fetched from the server
   const [announcements, setAnnouncements] = useState([]);
   // form: controlled state for the create-announcement form fields (title + content)
   const [form, setForm] = useState({ title: "", content: "" });
   // loading: true while the POST request to create an announcement is in progress
   const [loading, setLoading] = useState(false);
-  // fetching: true during the initial GET request — shows the inline spinner
+  // fetching: true during the initial GET request — shows the inline skeleton
   const [fetching, setFetching] = useState(true);
   // selected: the announcement whose full-content modal is open; null = no modal
   const [selected, setSelected] = useState(null);
@@ -20,10 +22,11 @@ const AnnouncementManager = () => {
   // Fetches all announcements belonging to this society from the /announcements/my endpoint
   const fetchAnnouncements = async () => {
     try {
-      const { data } = await axios.get("/announcements/my");
-      setAnnouncements(data);
-    } catch {
-      // 401 handled by global interceptor; other errors fail silently
+      const { data } = await axios.get(backendUrl + "/api/announcements/my", { headers: { token } });
+      if (!data.success) { toast.error(data.message); return; }
+      setAnnouncements(data.data);
+    } catch (e) {
+      toast.error(e.response?.data?.message || e.message);
     } finally {
       setFetching(false);
     }
@@ -43,15 +46,16 @@ const AnnouncementManager = () => {
     e.preventDefault(); // Prevent default browser form submission / page reload
     setLoading(true);
     try {
-      await axios.post("/announcements", form);
+      const { data } = await axios.post(backendUrl + "/api/announcements", form, { headers: { token } });
+      if (!data.success) { toast.error(data.message); return; }
       // Reset form fields so the society can immediately post another announcement
       setForm({ title: "", content: "" });
       // Re-fetch rather than optimistically prepending, to ensure we get the server-assigned
       // _id and createdAt timestamp for the new item
       fetchAnnouncements();
       toast.success("Announcement posted!");
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to post");
+    } catch (e) {
+      toast.error(e.response?.data?.message || e.message);
     } finally {
       // Re-enable the submit button regardless of success or failure
       setLoading(false);
@@ -63,13 +67,14 @@ const AnnouncementManager = () => {
   // If the deleted announcement is currently open in the modal, also close the modal.
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`/announcements/${id}`);
+      const { data } = await axios.delete(backendUrl + `/api/announcements/${id}`, { headers: { token } });
+      if (!data.success) { toast.error(data.message); return; }
       setAnnouncements((prev) => prev.filter((a) => a._id !== id));
       // Close the detail modal if the currently selected announcement was the one just deleted
       if (selected?._id === id) setSelected(null);
       toast.success("Announcement deleted");
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to delete");
+    } catch (e) {
+      toast.error(e.response?.data?.message || e.message);
     }
   };
 
@@ -104,7 +109,13 @@ const AnnouncementManager = () => {
       </form>
 
       {/* List of existing announcements — three branches: loading / empty / populated */}
-      {fetching && <Spinner />}
+      {fetching && (
+        <div className="flex flex-col gap-4">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="bg-white/5 rounded-xl h-24 animate-pulse" />
+          ))}
+        </div>
+      )}
       {!fetching && announcements.length === 0 && (
         <div className="text-center py-20 text-white/30">No announcements posted yet.</div>
       )}

@@ -13,8 +13,9 @@
 //   of authentication concerns (single-responsibility principle).
 // ─────────────────────────────────────────────────────────────────────────────
 
+import { useContext } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import { useAuth } from "./context/AuthContext"; // global auth state (user object + JWT)
+import { AppContext } from "./context/AppContext";
 import LandingPage from "./pages/LandingPage";
 import StudentDashboard from "./pages/student/StudentDashboard";
 import SocietyDashboard from "./pages/society/SocietyDashboard";
@@ -35,9 +36,9 @@ import SocietyDashboard from "./pages/society/SocietyDashboard";
 //   children — the page component to render if access is granted
 //   role     — the required role string: "student" or "society"
 const ProtectedRoute = ({ children, role }) => {
-  const { user, loading } = useAuth();
+  const { user, loading } = useContext(AppContext);
 
-  // Wait until AuthContext finishes checking localStorage / validating the token
+  // Wait until AppContext finishes checking localStorage / validating the token
   // before making any redirect decision — prevents a flicker to "/" on page refresh
   if (loading) return null;
 
@@ -63,7 +64,7 @@ const ProtectedRoute = ({ children, role }) => {
 // Props:
 //   children — the page component to render if the user is NOT logged in
 const PublicRoute = ({ children }) => {
-  const { user, loading } = useAuth();
+  const { user, loading } = useContext(AppContext);
 
   // Same loading guard as ProtectedRoute — avoid premature redirects
   if (loading) return null;

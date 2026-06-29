@@ -7,7 +7,7 @@ import { getPagination } from "../utils/pagination.js";
 export const createPost = async (req, res) => {
   try {
     const { caption } = req.body;
-    if (!req.file) return res.status(400).json({ message: "Media file is required" });
+    if (!req.file) return res.status(400).json({ success: false, message: "Media file is required" });
 
     // Upload the file buffer to Cloudinary and get back a public URL
     const result = await uploadToCloudinary(req.file.buffer, req.file.mimetype);
@@ -23,9 +23,9 @@ export const createPost = async (req, res) => {
       mediaType,
     });
 
-    res.status(201).json(post);
+    res.status(201).json({ success: true, data: post });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ success: false, message: err.message });
   }
 };
 
@@ -40,9 +40,9 @@ export const getPostsBySociety = async (req, res) => {
       .skip(skip)
       .limit(limit);
 
-    res.json({ data: posts, hasMore: page * limit < total });
+    res.json({ success: true, data: posts, hasMore: page * limit < total });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ success: false, message: err.message });
   }
 };
 
@@ -50,15 +50,15 @@ export const getPostsBySociety = async (req, res) => {
 export const deletePost = async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
-    if (!post) return res.status(404).json({ message: "Post not found" });
+    if (!post) return res.status(404).json({ success: false, message: "Post not found" });
 
     // Ensure only the society that created this post can delete it
     if (post.society.toString() !== req.user.id)
-      return res.status(403).json({ message: "Not authorized" });
+      return res.status(403).json({ success: false, message: "Not authorized" });
 
     await post.deleteOne();
-    res.json({ message: "Post deleted" });
+    res.json({ success: true, message: "Post deleted" });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ success: false, message: err.message });
   }
 };

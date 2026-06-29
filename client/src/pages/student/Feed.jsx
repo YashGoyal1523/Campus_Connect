@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
-import axios from "../../utils/axios";
+import { useEffect, useState, useContext } from "react";
+import axios from "axios";
+import { AppContext } from "../../context/AppContext";
+import { toast } from "react-hot-toast";
 import PostLightbox from "../../components/PostLightbox";
-import Spinner from "../../components/Spinner";
 
 // Converts a UTC date string into a human-readable relative time string
 // (e.g. "5s ago", "3m ago", "2h ago", "4d ago").
@@ -18,9 +19,11 @@ const timeAgo = (date) => {
 // Feed displays a paginated, chronological list of posts from societies
 // that the logged-in student follows. It also supports opening a post in a lightbox.
 const Feed = () => {
+  const { token , backendUrl } = useContext(AppContext);
+
   // posts: the array of post objects fetched from the server
   const [posts, setPosts] = useState([]);
-  // loading: true only during the very first fetch — shows a full-page spinner
+  // loading: true only during the very first fetch — shows a full-page skeleton
   const [loading, setLoading] = useState(true);
   // loadingMore: true when fetching additional pages — only disables the "Load More" button
   const [loadingMore, setLoadingMore] = useState(false);
@@ -37,14 +40,14 @@ const Feed = () => {
   //          if false, the list is replaced (initial load / refresh).
   const fetchData = async (pageNum = 1, append = false) => {
     try {
-      const { data } = await axios.get(`/follow/feed?page=${pageNum}&limit=6`);
+      const { data } = await axios.get(backendUrl + `/api/follow/feed?page=${pageNum}&limit=6`, { headers: { token } });
+      if (!data.success) { toast.error(data.message); return; }
       // Functional update form of setPosts ensures we always read the latest state,
       // which is important when append=true is called rapidly
       setPosts((prev) => append ? [...prev, ...data.data] : data.data);
       setHasMore(data.hasMore);
-    } catch {
-      // 401 (unauthenticated) errors are handled globally by the axios interceptor
-      // (it redirects to login). Other errors fail silently here to avoid crashing the feed.
+    } catch (e) {
+      toast.error(e.response?.data?.message || e.message);
     } finally {
       // finally always runs — guarantees spinners are hidden even if the request fails
       setLoading(false);
@@ -64,9 +67,15 @@ const Feed = () => {
     fetchData(nextPage, true);
   };
 
-  // Show a full-page spinner during the very first load so the user
+  // Show a list skeleton during the very first load so the user
   // sees feedback instead of an empty screen
-  if (loading) return <Spinner />;
+  if (loading) return (
+    <div className="flex flex-col gap-4">
+      {[...Array(4)].map((_, i) => (
+        <div key={i} className="bg-white/5 rounded-xl h-24 animate-pulse" />
+      ))}
+    </div>
+  );
 
   return (
     <div className="max-w-sm mx-auto">

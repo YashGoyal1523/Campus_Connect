@@ -5,11 +5,8 @@ import jwt from "jsonwebtoken";
 // If valid → attaches user info to req.user and calls next()
 // If invalid → blocks the request with 401 Unauthorized
 const verifyToken = (req, res, next) => {
-  // Token comes in the Authorization header as: "Bearer <token>"
-  // We split by space and take the second part (the actual token)
-  const token = req.headers.authorization?.split(" ")[1];
+  const token = req.headers.token;
 
-  // If no token found, reject the request immediately
   if (!token) {
     return res.status(401).json({ message: "No token, authorization denied" });
   }

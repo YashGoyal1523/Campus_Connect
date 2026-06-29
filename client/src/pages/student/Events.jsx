@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
-import axios from "../../utils/axios";
-import Spinner from "../../components/Spinner";
+import { useEffect, useState, useContext } from "react";
+import axios from "axios";
+import { AppContext } from "../../context/AppContext";
+import { toast } from "react-hot-toast";
 
 // Normalises a URL that may or may not include a protocol.
 // Some users paste links without "https://", so we prepend it when missing
@@ -10,9 +11,11 @@ const toAbsoluteUrl = (url) => url?.startsWith("http") ? url : `https://${url}`;
 // Events page: shows a paginated, searchable grid of upcoming campus events.
 // Students can browse, search, and register for events via an external Google Form link.
 const Events = () => {
+  const { token , backendUrl } = useContext(AppContext);
+
   // events: the full list of events fetched from the server (grows as pages are loaded)
   const [events, setEvents] = useState([]);
-  // loading: true only on the very first fetch — controls the full-page spinner
+  // loading: true only on the very first fetch — controls the full-page skeleton
   const [loading, setLoading] = useState(true);
   // loadingMore: true while fetching subsequent pages (Load More) — avoids duplicate fetches
   const [loadingMore, setLoadingMore] = useState(false);
@@ -30,11 +33,12 @@ const Events = () => {
   // append=false replaces the list entirely (initial load).
   const fetchData = async (pageNum = 1, append = false) => {
     try {
-      const { data } = await axios.get(`/events?page=${pageNum}&limit=9`);
+      const { data } = await axios.get(backendUrl + `/api/events?page=${pageNum}&limit=9`, { headers: { token } });
+      if (!data.success) { toast.error(data.message); return; }
       setEvents((prev) => append ? [...prev, ...data.data] : data.data);
       setHasMore(data.hasMore);
-    } catch {
-      // Global axios interceptor handles 401; other errors fail silently
+    } catch (e) {
+      toast.error(e.response?.data?.message || e.message);
     } finally {
       // finally block guarantees loading flags are cleared even if the request throws
       setLoading(false);
@@ -53,8 +57,14 @@ const Events = () => {
     fetchData(nextPage, true);
   };
 
-  // Show a full-page spinner until the initial data arrives
-  if (loading) return <Spinner />;
+  // Show a grid skeleton until the initial data arrives
+  if (loading) return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+      {[...Array(6)].map((_, i) => (
+        <div key={i} className="bg-white/5 rounded-xl h-48 animate-pulse" />
+      ))}
+    </div>
+  );
 
   // Client-side filtering: runs on every render using the current search string.
   // startsWith is intentional — it ranks results where the title/name *begins* with the query,

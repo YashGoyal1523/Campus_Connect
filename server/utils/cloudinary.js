@@ -1,11 +1,5 @@
 import { v2 as cloudinary } from "cloudinary";
 import multer from "multer";
-import { fileURLToPath } from "url";
-import { dirname, join } from "path";
-import dotenv from "dotenv";
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
-dotenv.config({ path: join(__dirname, "../.env") });
 
 // Configure Cloudinary with credentials from .env
 cloudinary.config({
@@ -36,5 +30,3 @@ export const uploadToCloudinary = async (buffer, mimetype) => {
 
   return result; // result.secure_url is the public HTTPS URL of the uploaded file
 };
-
-export default cloudinary;

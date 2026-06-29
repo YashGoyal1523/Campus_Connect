@@ -1,8 +1,8 @@
-import { useState } from "react";
-import { useAuth } from "../../context/AuthContext";
+import { useState, useContext } from "react";
+import { AppContext } from "../../context/AppContext";
 import { useNavigate } from "react-router-dom";
-import axios from "../../utils/axios";
-import toast from "react-hot-toast";
+import axios from "axios";
+import { toast } from "react-hot-toast";
 import PostSection from "./PostSection";
 import RecruitmentManager from "./RecruitmentManager";
 import EventManager from "./EventManager";
@@ -26,6 +26,8 @@ const navItems = [
 // The active sidebar item controls which child component (PostSection, EventManager, etc.) is shown.
 // It also owns the Profile modal, which societies use to view their public profile and delete their account.
 const SocietyDashboard = () => {
+  const { user, token, logout , backendUrl } = useContext(AppContext);
+
   // active: the id of the currently selected sidebar item; determines what renderSection() returns
   const [active, setActive] = useState("posts");
   // profileOpen: controls whether the profile modal overlay is visible
@@ -36,7 +38,6 @@ const SocietyDashboard = () => {
   const [posts, setPosts] = useState([]);
   // lightbox: the post currently open in the fullscreen lightbox inside the profile modal
   const [lightbox, setLightbox] = useState(null);
-  const { user, logout } = useAuth();
   const navigate = useNavigate();
 
   // Clears auth state, shows a toast, and redirects to the home/login page
@@ -53,15 +54,17 @@ const SocietyDashboard = () => {
     setProfileOpen(true);
     try {
       const [{ data: profileData }, { data: postsData }] = await Promise.all([
-        profile ? Promise.resolve({ data: profile }) : axios.get("/auth/me"),
-        axios.get(`/posts/${user.id}`),
+        profile ? Promise.resolve({ data: { success: true, user: profile } }) : axios.get(backendUrl + "/api/auth/me", { headers: { token } }),
+        axios.get(backendUrl + `/api/posts/${user.id}`, { headers: { token } }),
       ]);
-      setProfile(profileData);
+      if (!profileData.success) { toast.error(profileData.message); setProfileOpen(false); return; }
+      if (!postsData.success) { toast.error(postsData.message); setProfileOpen(false); return; }
+      setProfile(profileData.user);
       setPosts(postsData.data);
-    } catch {
+    } catch (e) {
       // Close the modal so the user isn't stuck with an infinite spinner
       setProfileOpen(false);
-      toast.error("Failed to load profile");
+      toast.error(e.response?.data?.message || e.message);
     }
   };
 
@@ -70,12 +73,12 @@ const SocietyDashboard = () => {
   const handleDeleteAccount = async () => {
     if (!window.confirm("Are you sure you want to delete your society account? All posts, events and recruitments will be permanently deleted.")) return;
     try {
-      await axios.delete("/auth/me");
+      await axios.delete(backendUrl + "/api/auth/me", { headers: { token } });
       logout();
       toast.success("Account deleted");
       navigate("/");
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to delete account");
+    } catch (e) {
+      toast.error(e.response?.data?.message || e.message);
     }
   };
 
@@ -83,11 +86,12 @@ const SocietyDashboard = () => {
   // Updates local state immediately via filter to avoid a full re-fetch.
   const deletePost = async (postId) => {
     try {
-      await axios.delete(`/posts/${postId}`);
+      const { data } = await axios.delete(backendUrl + `/api/posts/${postId}`, { headers: { token } });
+      if (!data.success) { toast.error(data.message); return; }
       setPosts((prev) => prev.filter((p) => p._id !== postId));
       toast.success("Post deleted");
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to delete post");
+    } catch (e) {
+      toast.error(e.response?.data?.message || e.message);
     }
   };
 
@@ -241,7 +245,7 @@ const SocietyDashboard = () => {
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                       {posts.map((post) => (
                         // onDelete is passed so the society can delete posts directly from the profile modal
-                        <PostCard key={post._id} post={post} height="h-36" onClick={() => setLightbox(post)} onDelete={deletePost} />
+                        <PostCard key={post._id} post={post} onClick={() => setLightbox(post)} onDelete={deletePost} />
                       ))}
                     </div>
                   )}

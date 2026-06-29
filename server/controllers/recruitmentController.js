@@ -13,9 +13,9 @@ export const createRecruitment = async (req, res) => {
       googleFormLink, // link to Google Form for applications
       deadline,
     });
-    res.status(201).json(recruitment);
+    res.status(201).json({ success: true, data: recruitment });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ success: false, message: err.message });
   }
 };
 
@@ -31,9 +31,9 @@ export const getAllRecruitments = async (req, res) => {
       .skip(skip)
       .limit(limit);
 
-    res.json({ data: recruitments, hasMore: page * limit < total });
+    res.json({ success: true, data: recruitments, hasMore: page * limit < total });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ success: false, message: err.message });
   }
 };
 
@@ -43,9 +43,9 @@ export const getRecruitmentsBySociety = async (req, res) => {
   try {
     const recruitments = await Recruitment.find({ society: req.user.id })
       .sort({ deadline: 1 }); // earliest deadline first (most urgent at top)
-    res.json(recruitments);
+    res.json({ success: true, data: recruitments });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ success: false, message: err.message });
   }
 };
 
@@ -53,15 +53,15 @@ export const getRecruitmentsBySociety = async (req, res) => {
 export const deleteRecruitment = async (req, res) => {
   try {
     const recruitment = await Recruitment.findById(req.params.id);
-    if (!recruitment) return res.status(404).json({ message: "Not found" });
+    if (!recruitment) return res.status(404).json({ success: false, message: "Not found" });
 
     // Only the society that posted this can delete it
     if (recruitment.society.toString() !== req.user.id)
-      return res.status(403).json({ message: "Not authorized" });
+      return res.status(403).json({ success: false, message: "Not authorized" });
 
     await recruitment.deleteOne();
-    res.json({ message: "Recruitment deleted" });
+    res.json({ success: true, message: "Recruitment deleted" });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ success: false, message: err.message });
   }
 };

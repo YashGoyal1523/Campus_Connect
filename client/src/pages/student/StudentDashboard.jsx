@@ -1,8 +1,8 @@
-import { useState } from "react";
-import { useAuth } from "../../context/AuthContext";
+import { useState, useContext } from "react";
+import { AppContext } from "../../context/AppContext";
 import { useNavigate } from "react-router-dom";
-import axios from "../../utils/axios";
-import toast from "react-hot-toast";
+import axios from "axios";
+import { toast } from "react-hot-toast";
 import Discover from "./Discover";
 import Recruitment from "./Recruitment";
 import Events from "./Events";
@@ -26,6 +26,8 @@ const navItems = [
 ];
 
 const StudentDashboard = () => {
+  const { user, token, logout, backendUrl } = useContext(AppContext);
+
   // active: which sidebar tab is currently selected; determines which component renders
   const [active, setActive] = useState("feed");
   // profileOpen: whether the profile slide-over modal is visible
@@ -34,7 +36,6 @@ const StudentDashboard = () => {
   const [profile, setProfile] = useState(null);
   // memberships: societies the student is a team member of, shown inside the profile modal
   const [memberships, setMemberships] = useState([]);
-  const { user, logout } = useAuth();
   const navigate = useNavigate();
 
   // Clears auth state and redirects to the landing page
@@ -51,15 +52,17 @@ const StudentDashboard = () => {
     try {
       const [{ data: profileData }, { data: membershipsData }] = await Promise.all([
         // Only fetch profile if not already loaded (avoids re-fetching on every open)
-        profile ? Promise.resolve({ data: profile }) : axios.get("/auth/me"),
-        axios.get("/team/my-societies"),
+        profile ? Promise.resolve({ data: { success: true, user: profile } }) : axios.get(backendUrl + "/api/auth/me", { headers: { token } }),
+        axios.get(backendUrl + "/api/team/my-societies", { headers: { token } }),
       ]);
-      setProfile(profileData);
-      setMemberships(membershipsData);
-    } catch {
+      if (!profileData.success) { toast.error(profileData.message); setProfileOpen(false); return; }
+      if (!membershipsData.success) { toast.error(membershipsData.message); setProfileOpen(false); return; }
+      setProfile(profileData.user);
+      setMemberships(membershipsData.data);
+    } catch (e) {
       // Close the modal so the user isn't stuck with an infinite spinner
       setProfileOpen(false);
-      toast.error("Failed to load profile");
+      toast.error(e.response?.data?.message || e.message);
     }
   };
 
@@ -72,12 +75,12 @@ const StudentDashboard = () => {
       following: prev.following.filter((s) => s._id !== societyId),
     }));
     try {
-      await axios.delete(`/follow/${societyId}`);
+      await axios.delete(backendUrl + `/api/follow/${societyId}`, { headers: { token } });
       toast.success("Unfollowed");
-    } catch {
+    } catch (e) {
       // Rollback the optimistic removal if the server call fails
       setProfile((prev) => ({ ...prev, following: previousFollowing }));
-      toast.error("Failed to unfollow");
+      toast.error(e.response?.data?.message || e.message);
     }
   };
 
@@ -86,12 +89,12 @@ const StudentDashboard = () => {
   const handleDeleteAccount = async () => {
     if (!window.confirm("Are you sure you want to delete your account? This cannot be undone.")) return;
     try {
-      await axios.delete("/auth/me");
+      await axios.delete(backendUrl + "/api/auth/me", { headers: { token } });
       logout();
       toast.success("Account deleted");
       navigate("/");
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to delete account");
+    } catch (e) {
+      toast.error(e.response?.data?.message || e.message);
     }
   };
 

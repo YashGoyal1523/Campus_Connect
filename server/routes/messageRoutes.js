@@ -60,18 +60,18 @@ router.get("/:societyId", verifyToken, async (req, res) => {
       const isMember = await TeamMember.findOne({ society: societyId, rollNo: student.rollNo });
 
       // If no matching TeamMember document, the student is not part of this team
-      if (!isMember) return res.status(403).json({ message: "Not a member of this society" });
+      if (!isMember) return res.status(403).json({ success: false, message: "Not a member of this society" });
     } else {
       // For society accounts: req.user.id is the society's own MongoDB _id.
       // They should only be able to read their own society's chat.
-      if (req.user.id !== societyId) return res.status(403).json({ message: "Not authorized" });
+      if (req.user.id !== societyId) return res.status(403).json({ success: false, message: "Not authorized" });
     }
 
     // Fetch all messages for this chat room, sorted chronologically
     const messages = await Message.find({ society: societyId }).sort({ createdAt: 1 });
-    res.json(messages);
+    res.json({ success: true, data: messages });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ success: false, message: err.message });
   }
 });
 
@@ -90,7 +90,7 @@ router.get("/:societyId", verifyToken, async (req, res) => {
 router.post("/upload", verifyToken, upload.single("file"), async (req, res) => {
   try {
     // Guard against requests that have no file attached
-    if (!req.file) return res.status(400).json({ message: "No file uploaded" });
+    if (!req.file) return res.status(400).json({ success: false, message: "No file uploaded" });
 
     // Upload the buffer to Cloudinary; the helper handles resource_type detection
     const result = await uploadToCloudinary(req.file.buffer, req.file.mimetype);
@@ -99,9 +99,9 @@ router.post("/upload", verifyToken, upload.single("file"), async (req, res) => {
     // so the client knows which HTML element to use (<video> vs <img>)
     const attachmentType = req.file.mimetype.startsWith("video") ? "video" : "image";
 
-    res.json({ url: result.secure_url, type: attachmentType });
+    res.json({ success: true, url: result.secure_url, type: attachmentType });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ success: false, message: err.message });
   }
 });
 

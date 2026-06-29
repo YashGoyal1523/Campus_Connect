@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
-import axios from "../../utils/axios";
-import Spinner from "../../components/Spinner";
+import { useEffect, useState, useContext } from "react";
+import axios from "axios";
+import { AppContext } from "../../context/AppContext";
+import { toast } from "react-hot-toast";
 
 // Ensures any URL has a protocol prefix so anchor tags navigate correctly.
 // Some societies paste links like "forms.google.com/..." without "https://",
@@ -10,9 +11,11 @@ const toAbsoluteUrl = (url) => url?.startsWith("http") ? url : `https://${url}`;
 // Recruitment page: shows a paginated, searchable list of open society recruitment postings.
 // Students can read descriptions and apply via an external Google Form link.
 const Recruitment = () => {
+  const { token , backendUrl } = useContext(AppContext);
+
   // recruitments: accumulated list of postings fetched from the server
   const [recruitments, setRecruitments] = useState([]);
-  // loading: controls the full-page spinner shown only on the very first fetch
+  // loading: controls the full-page skeleton shown only on the very first fetch
   const [loading, setLoading] = useState(true);
   // loadingMore: prevents the Load More button from being clicked twice in a row
   const [loadingMore, setLoadingMore] = useState(false);
@@ -29,11 +32,12 @@ const Recruitment = () => {
   // append=true appends to the existing list (Load More); false replaces it (initial/refresh).
   const fetchData = async (pageNum = 1, append = false) => {
     try {
-      const { data } = await axios.get(`/recruitments?page=${pageNum}&limit=6`);
+      const { data } = await axios.get(backendUrl + `/api/recruitments?page=${pageNum}&limit=6`, { headers: { token } });
+      if (!data.success) { toast.error(data.message); return; }
       setRecruitments((prev) => append ? [...prev, ...data.data] : data.data);
       setHasMore(data.hasMore);
-    } catch {
-      // 401 errors redirect to login via the global axios interceptor; others fail silently
+    } catch (e) {
+      toast.error(e.response?.data?.message || e.message);
     } finally {
       // finally guarantees both loading flags are cleared regardless of success or failure
       setLoading(false);
@@ -52,7 +56,13 @@ const Recruitment = () => {
     fetchData(nextPage, true);
   };
 
-  if (loading) return <Spinner />;
+  if (loading) return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+      {[...Array(6)].map((_, i) => (
+        <div key={i} className="bg-white/5 rounded-xl h-48 animate-pulse" />
+      ))}
+    </div>
+  );
 
   // Client-side search: filters by role name or society name.
   // startsWith is used rather than includes() so the search feels fast and intentional —

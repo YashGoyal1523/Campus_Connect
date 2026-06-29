@@ -1,9 +1,8 @@
-import { useEffect, useState } from "react";
-import axios from "../../utils/axios";
-import Spinner from "../../components/Spinner";
+import { useEffect, useState, useContext } from "react";
+import axios from "axios";
+import { AppContext } from "../../context/AppContext";
+import { toast } from "react-hot-toast";
 import GroupChat from "../../components/GroupChat";
-import { useAuth } from "../../context/AuthContext";
-import toast from "react-hot-toast";
 
 // Ordered list of available positions used to populate the position dropdown.
 // Defined outside the component so the array is never recreated on re-renders.
@@ -40,13 +39,13 @@ const POSITION_COLORS = {
 // TeamManager is the society-side panel for managing team membership,
 // posting internal (team-only) announcements, and accessing the group chat with team members.
 const TeamManager = () => {
-  const { user } = useAuth();
+  const { user, token , backendUrl } = useContext(AppContext);
 
   // members: the current list of team members for this society
   const [members, setMembers] = useState([]);
   // announcements: team-only announcements visible only to society members
   const [announcements, setAnnouncements] = useState([]);
-  // fetching: true during the initial parallel data fetch — shows the full-page spinner
+  // fetching: true during the initial parallel data fetch — shows the full-page skeleton
   const [fetching, setFetching] = useState(true);
   // tab: which section is active ("members" | "announcements" | "chat")
   const [tab, setTab] = useState("members");
@@ -62,18 +61,21 @@ const TeamManager = () => {
   const [announcementForm, setAnnouncementForm] = useState({ title: "", content: "" });
   // announcementLoading: disables the post button while the request is in progress
   const [announcementLoading, setAnnouncementLoading] = useState(false);
+
   // On mount: fetch members and team announcements in parallel.
   useEffect(() => {
     const fetchData = async () => {
       try {
         const [{ data: membersData }, { data: announcementsData }] = await Promise.all([
-          axios.get("/team/members"),
-          axios.get("/team/announcements"),
+          axios.get(backendUrl + "/api/team/members", { headers: { token } }),
+          axios.get(backendUrl + "/api/team/announcements", { headers: { token } }),
         ]);
-        setMembers(membersData);
-        setAnnouncements(announcementsData);
-      } catch {
-        // handled by axios interceptor
+        if (!membersData.success) { toast.error(membersData.message); return; }
+        if (!announcementsData.success) { toast.error(announcementsData.message); return; }
+        setMembers(membersData.data);
+        setAnnouncements(announcementsData.data);
+      } catch (e) {
+        toast.error(e.response?.data?.message || e.message);
       } finally {
         setFetching(false);
       }
@@ -88,14 +90,15 @@ const TeamManager = () => {
     e.preventDefault(); // Prevent browser default form submission
     setMemberLoading(true);
     try {
-      const { data } = await axios.post("/team/members", memberForm);
+      const { data } = await axios.post(backendUrl + "/api/team/members", memberForm, { headers: { token } });
+      if (!data.success) { toast.error(data.message); return; }
       // Append the new member to the end of the list (server assigns _id and createdAt)
-      setMembers((prev) => [...prev, data]);
+      setMembers((prev) => [...prev, data.data]);
       // Reset the form so the society can immediately add the next member
       setMemberForm({ name: "", rollNo: "", position: "" });
       toast.success("Member added!");
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to add member");
+    } catch (e) {
+      toast.error(e.response?.data?.message || e.message);
     } finally {
       setMemberLoading(false);
     }
@@ -104,9 +107,13 @@ const TeamManager = () => {
   // Removes a member by ID from the server and filters the local array.
   // No confirmation dialog: this is a low-stakes action that can be re-done easily.
   const handleRemoveMember = async (id) => {
-    await axios.delete(`/team/members/${id}`);
-    setMembers((prev) => prev.filter((m) => m._id !== id));
-    toast.success("Member removed");
+    try {
+      await axios.delete(backendUrl + `/api/team/members/${id}`, { headers: { token } });
+      setMembers((prev) => prev.filter((m) => m._id !== id));
+      toast.success("Member removed");
+    } catch (e) {
+      toast.error(e.response?.data?.message || e.message);
+    }
   };
 
   // Posts a new internal announcement.
@@ -115,13 +122,14 @@ const TeamManager = () => {
     e.preventDefault();
     setAnnouncementLoading(true);
     try {
-      const { data } = await axios.post("/team/announcements", announcementForm);
+      const { data } = await axios.post(backendUrl + "/api/team/announcements", announcementForm, { headers: { token } });
+      if (!data.success) { toast.error(data.message); return; }
       // Prepend so the newest announcement appears first
-      setAnnouncements((prev) => [data, ...prev]);
+      setAnnouncements((prev) => [data.data, ...prev]);
       setAnnouncementForm({ title: "", content: "" });
       toast.success("Announcement posted!");
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to post");
+    } catch (e) {
+      toast.error(e.response?.data?.message || e.message);
     } finally {
       setAnnouncementLoading(false);
     }
@@ -129,9 +137,13 @@ const TeamManager = () => {
 
   // Deletes a team announcement and removes it from local state
   const handleDeleteAnnouncement = async (id) => {
-    await axios.delete(`/team/announcements/${id}`);
-    setAnnouncements((prev) => prev.filter((a) => a._id !== id));
-    toast.success("Deleted");
+    try {
+      await axios.delete(backendUrl + `/api/team/announcements/${id}`, { headers: { token } });
+      setAnnouncements((prev) => prev.filter((a) => a._id !== id));
+      toast.success("Deleted");
+    } catch (e) {
+      toast.error(e.response?.data?.message || e.message);
+    }
   };
 
   // Build the filtered + grouped member lists for the Members tab.
@@ -144,7 +156,13 @@ const TeamManager = () => {
   const leaders = filteredMembers.filter((m) => !["Core Member", "General Member"].includes(m.position));
   const general = filteredMembers.filter((m) => ["Core Member", "General Member"].includes(m.position));
 
-  if (fetching) return <Spinner />;
+  if (fetching) return (
+    <div className="flex flex-col gap-4">
+      {[...Array(4)].map((_, i) => (
+        <div key={i} className="bg-white/5 rounded-xl h-24 animate-pulse" />
+      ))}
+    </div>
+  );
 
   return (
     <div>

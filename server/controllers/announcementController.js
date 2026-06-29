@@ -11,9 +11,9 @@ export const createAnnouncement = async (req, res) => {
       title,
       content,
     });
-    res.status(201).json(announcement);
+    res.status(201).json({ success: true, data: announcement });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ success: false, message: err.message });
   }
 };
 
@@ -29,9 +29,9 @@ export const getAllAnnouncements = async (req, res) => {
       .skip(skip)
       .limit(limit);
 
-    res.json({ data: announcements, hasMore: page * limit < total });
+    res.json({ success: true, data: announcements, hasMore: page * limit < total });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ success: false, message: err.message });
   }
 };
 
@@ -41,9 +41,9 @@ export const getMyAnnouncements = async (req, res) => {
   try {
     const announcements = await Announcement.find({ society: req.user.id })
       .sort({ createdAt: -1 });
-    res.json(announcements);
+    res.json({ success: true, data: announcements });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ success: false, message: err.message });
   }
 };
 
@@ -51,15 +51,15 @@ export const getMyAnnouncements = async (req, res) => {
 export const deleteAnnouncement = async (req, res) => {
   try {
     const a = await Announcement.findById(req.params.id);
-    if (!a) return res.status(404).json({ message: "Not found" });
+    if (!a) return res.status(404).json({ success: false, message: "Not found" });
 
     // Only the society that created this announcement can delete it
     if (a.society.toString() !== req.user.id)
-      return res.status(403).json({ message: "Not authorized" });
+      return res.status(403).json({ success: false, message: "Not authorized" });
 
     await a.deleteOne();
-    res.json({ message: "Deleted" });
+    res.json({ success: true, message: "Deleted" });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ success: false, message: err.message });
   }
 };

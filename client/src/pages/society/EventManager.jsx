@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
-import axios from "../../utils/axios";
-import Spinner from "../../components/Spinner";
-import toast from "react-hot-toast";
+import { useEffect, useState, useContext } from "react";
+import axios from "axios";
+import { AppContext } from "../../context/AppContext";
+import { toast } from "react-hot-toast";
 
 // Ensures a URL has an "https://" prefix so <a href> navigates correctly.
 // Without this, a bare domain like "forms.google.com/..." would be treated as a relative path.
@@ -10,6 +10,8 @@ const toAbsoluteUrl = (url) => url?.startsWith("http") ? url : `https://${url}`;
 // EventManager is the society-side panel for creating, viewing,
 // and deleting the society's events. It also supports an optional poster image upload.
 const EventManager = () => {
+  const { token , backendUrl } = useContext(AppContext);
+
   // events: the list of this society's events fetched from the API
   const [events, setEvents] = useState([]);
   // form: controlled state for all text/date fields in the create-event form
@@ -18,7 +20,7 @@ const EventManager = () => {
   const [poster, setPoster] = useState(null);
   // loading: true while the POST request to create an event is in progress — disables submit
   const [loading, setLoading] = useState(false);
-  // fetching: true during the initial GET — shows the inline spinner
+  // fetching: true during the initial GET — shows the inline skeleton
   const [fetching, setFetching] = useState(true);
   // selected: the event whose detail modal is open; null = no modal
   const [selected, setSelected] = useState(null);
@@ -26,10 +28,11 @@ const EventManager = () => {
   // Fetches all events created by this society from the /events/my endpoint
   const fetchEvents = async () => {
     try {
-      const { data } = await axios.get("/events/my");
-      setEvents(data);
-    } catch {
-      // 401 redirected by global axios interceptor; other errors fail silently
+      const { data } = await axios.get(backendUrl + "/api/events/my", { headers: { token } });
+      if (!data.success) { toast.error(data.message); return; }
+      setEvents(data.data);
+    } catch (e) {
+      toast.error(e.response?.data?.message || e.message);
     } finally {
       setFetching(false);
     }
@@ -54,7 +57,8 @@ const EventManager = () => {
     // poster is optional — only append it when the user actually chose a file
     if (poster) formData.append("poster", poster);
     try {
-      await axios.post("/events", formData);
+      const { data } = await axios.post(backendUrl + "/api/events", formData, { headers: { token } });
+      if (!data.success) { toast.error(data.message); return; }
       // Reset all form state after a successful post
       setForm({ title: "", description: "", date: "", venue: "", googleFormLink: "" });
       setPoster(null);
@@ -64,8 +68,8 @@ const EventManager = () => {
       // Re-fetch the events list from page 1 to show the newly created event
       fetchEvents();
       toast.success("Event posted!");
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to post event");
+    } catch (e) {
+      toast.error(e.response?.data?.message || e.message);
     } finally {
       setLoading(false);
     }
@@ -76,13 +80,14 @@ const EventManager = () => {
   // If the deleted event is currently open in the modal, also close the modal.
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`/events/${id}`);
+      const { data } = await axios.delete(backendUrl + `/api/events/${id}`, { headers: { token } });
+      if (!data.success) { toast.error(data.message); return; }
       setEvents(events.filter((ev) => ev._id !== id));
       // Close the detail modal if the event currently being viewed is the one that was deleted
       if (selected?._id === id) setSelected(null);
       toast.success("Event deleted");
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to delete");
+    } catch (e) {
+      toast.error(e.response?.data?.message || e.message);
     }
   };
 
@@ -122,7 +127,13 @@ const EventManager = () => {
       </form>
 
       {/* Event list — three render branches: loading / empty / populated */}
-      {fetching && <Spinner />}
+      {fetching && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="bg-white/5 rounded-xl h-48 animate-pulse" />
+          ))}
+        </div>
+      )}
       {!fetching && events.length === 0 && (
         <div className="text-center py-20 text-white/30">No events posted yet.</div>
       )}
