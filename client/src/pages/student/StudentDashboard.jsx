@@ -56,8 +56,7 @@ const StudentDashboard = () => {
     setProfileOpen(true);
     try {
       const [{ data: profileData }, { data: membershipsData }] = await Promise.all([
-        // Only fetch profile if not already loaded (avoids re-fetching on every open)
-        profile ? Promise.resolve({ data: { success: true, user: profile } }) : axios.get(backendUrl + "/api/auth/me", { headers: { token } }),
+        axios.get(backendUrl + "/api/auth/me", { headers: { token } }),
         axios.get(backendUrl + "/api/team/my-societies", { headers: { token } }),
       ]);
       if (!profileData.success) { toast.error(profileData.message); setProfileOpen(false); return; }
@@ -218,7 +217,7 @@ const StudentDashboard = () => {
                 {memberships.length > 0 && (
                   <div className="rounded-xl bg-white/5 border border-white/10 px-4 py-3">
                     <p className="text-white/40 text-xs mb-3">My Societies ({memberships.length})</p>
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-2 max-h-48 overflow-y-auto">
                       {memberships.map((m) => (
                         <div key={m._id} className="flex items-center justify-between gap-2">
                           <div className="flex items-center gap-2 min-w-0">
@@ -238,7 +237,7 @@ const StudentDashboard = () => {
                 {profile.following?.length > 0 && (
                   <div className="rounded-xl bg-white/5 border border-white/10 px-4 py-3">
                     <p className="text-white/40 text-xs mb-3">Following ({profile.following.length})</p>
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-2 max-h-48 overflow-y-auto">
                       {profile.following.map((s) => (
                         <div key={s._id} className="flex items-center justify-between gap-2">
                           <div className="flex items-center gap-2">
