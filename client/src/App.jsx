@@ -70,10 +70,10 @@ const PublicRoute = ({ children }) => {
   if (loading) return null;
 
   // If a student is already logged in, redirect them straight to their feed
-  if (user?.role === "student") return <Navigate to="/student/discover" />;
+  if (user?.role === "student") return <Navigate to="/student" />;
 
-  // If a society is already logged in, redirect them to their posts dashboard
-  if (user?.role === "society") return <Navigate to="/society/posts" />;
+  // If a society is already logged in, redirect them to their dashboard
+  if (user?.role === "society") return <Navigate to="/society" />;
 
   // No user logged in — show the public page (landing page)
   return children;
@@ -98,7 +98,7 @@ const App = () => {
       {/* Student dashboard and all its nested sub-routes (e.g. /student/discover).
           Only accessible to users whose role is "student". */}
       <Route
-        path="/student/*"
+        path="/student"
         element={
           <ProtectedRoute role="student">
             <StudentDashboard />
@@ -109,7 +109,7 @@ const App = () => {
       {/* Society dashboard and all its nested sub-routes (e.g. /society/posts).
           Only accessible to users whose role is "society". */}
       <Route
-        path="/society/*"
+        path="/society"
         element={
           <ProtectedRoute role="society">
             <SocietyDashboard />
