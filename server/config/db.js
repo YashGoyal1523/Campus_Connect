@@ -8,7 +8,7 @@ const connectDB = async () => {
   });
 
   // Connect to MongoDB database
-  await mongoose.connect(`${process.env.MONGO_URI}/CampusConnect`);
+  await mongoose.connect(process.env.MONGO_URI);
 };
 
 export default connectDB;
