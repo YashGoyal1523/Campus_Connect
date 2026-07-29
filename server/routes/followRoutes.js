@@ -5,9 +5,9 @@
 // Mounted at /api/follow in the main server file.
 //
 // Full paths:
-//   GET    /api/follow/feed          — get the student's personalised post feed
-//   POST   /api/follow/:societyId    — follow a society
-//   DELETE /api/follow/:societyId    — unfollow a society
+//   GET    /api/follow/feed          - get the student's personalised post feed
+//   POST   /api/follow/:societyId    - follow a society
+//   DELETE /api/follow/:societyId    - unfollow a society
 //
 // All three routes are student-only:
 //   Societies don't follow other societies, so every route is guarded by
@@ -15,8 +15,8 @@
 //   accidentally polluting the follow graph.
 //
 // Middleware used:
-//   verifyToken  — validates JWT; required on all routes (following is a personal action)
-//   verifyRole   — restricts all routes to "student" role users only
+//   verifyToken  - validates JWT; required on all routes (following is a personal action)
+//   verifyRole   - restricts all routes to "student" role users only
 // ─────────────────────────────────────────────────────────────────────────────
 
 import express from "express";
@@ -28,7 +28,7 @@ const router = express.Router();
 
 // GET /api/follow/feed
 // Returns a feed of recent posts from all societies the logged-in student follows.
-// This is the student's home/discovery feed — the core value of the follow system.
+// This is the student's home/discovery feed - the core value of the follow system.
 // Requires auth so the server knows which student's follow list to look up.
 router.get("/feed", verifyToken, verifyRole("student"), getFeed);
 

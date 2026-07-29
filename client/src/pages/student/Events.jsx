@@ -15,9 +15,9 @@ const Events = () => {
 
   // events: the full list of events fetched from the server (grows as pages are loaded)
   const [events, setEvents] = useState([]);
-  // loading: true only on the very first fetch — controls the full-page skeleton
+  // loading: true only on the very first fetch - controls the full-page skeleton
   const [loading, setLoading] = useState(true);
-  // loadingMore: true while fetching subsequent pages (Load More) — avoids duplicate fetches
+  // loadingMore: true while fetching subsequent pages (Load More) - avoids duplicate fetches
   const [loadingMore, setLoadingMore] = useState(false);
   // hasMore: whether there are additional pages available on the server
   const [hasMore, setHasMore] = useState(false);
@@ -72,7 +72,7 @@ const Events = () => {
   );
 
   // Client-side filtering: runs on every render using the current search string.
-  // startsWith is intentional — it ranks results where the title/name *begins* with the query,
+  // startsWith is intentional - it ranks results where the title/name *begins* with the query,
   // which feels more precise than includes() for a search-as-you-type experience.
   const filtered = events.filter((e) => {
     const q = search.toLowerCase();
@@ -84,7 +84,7 @@ const Events = () => {
       <h1 className="text-3xl font-bold mb-2">Upcoming Events</h1>
       <p className="text-white/40 mb-6">Stay updated on everything happening on campus</p>
 
-      {/* Controlled search input — updates `search` state on every keystroke,
+      {/* Controlled search input - updates `search` state on every keystroke,
           which immediately re-evaluates `filtered` above on the next render */}
       <input
         type="text" placeholder="Search by event name or society..."
@@ -126,7 +126,7 @@ const Events = () => {
                       <h3 className="font-bold text-sm truncate">{e.title}</h3>
                       <p className="text-purple-300 text-xs">{e.society?.name}</p>
                     </div>
-                    {/* Date block: day+month on one line, year smaller below — compact but readable */}
+                    {/* Date block: day+month on one line, year smaller below - compact but readable */}
                     <div className="text-right shrink-0">
                       <p className="text-white font-bold text-xs">{date.toLocaleDateString("en-IN", { day: "numeric", month: "short" })}</p>
                       <p className="text-white/30 text-xs">{date.getFullYear()}</p>

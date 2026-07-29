@@ -12,7 +12,7 @@ const PostLightbox = ({ post, onClose }) => {
   }, []);
 
   // Attach a global keyboard listener so pressing Escape closes the lightbox,
-  // which is standard UX for any modal or overlay — users expect it
+  // which is standard UX for any modal or overlay - users expect it
   useEffect(() => {
     const handler = (e) => { if (e.key === "Escape") onClose(); };
     // addEventListener on 'window' (not a specific element) so the event is caught
@@ -46,7 +46,7 @@ const PostLightbox = ({ post, onClose }) => {
           ? <video src={post.mediaUrl} controls autoPlay className="w-full max-h-[75vh] rounded-2xl object-contain bg-black" />
           : <img src={post.mediaUrl} alt={post.caption} className="w-full max-h-[75vh] rounded-2xl object-contain bg-black" />}
 
-        {/* Only render caption text if one exists — avoids dead whitespace below media */}
+        {/* Only render caption text if one exists - avoids dead whitespace below media */}
         {post.caption && (
           <p className="mt-3 text-white/70 text-sm text-center">{post.caption}</p>
         )}

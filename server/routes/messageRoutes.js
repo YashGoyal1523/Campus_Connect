@@ -10,17 +10,17 @@
 //      the Socket.IO event can then reference.
 //
 // Full paths:
-//   GET   /api/messages/:societyId   — fetch chat history for a society's chat room
-//   POST  /api/messages/upload       — upload a media file, returns its Cloudinary URL
+//   GET   /api/messages/:societyId   - fetch chat history for a society's chat room
+//   POST  /api/messages/upload       - upload a media file, returns its Cloudinary URL
 //
-// Access control — two-tier check in the GET route:
+// Access control - two-tier check in the GET route:
 //   - Students: must be a registered TeamMember of the requested society.
 //   - Societies: can only fetch their OWN chat room (societyId must match req.user.id).
 //   This ensures chat history is private to the team and not visible to outsiders.
 //
 // Middleware used:
-//   verifyToken  — required on both routes; chat is always private/authenticated
-//   upload       — multer memory storage; used on the /upload route to receive the file
+//   verifyToken  - required on both routes; chat is always private/authenticated
+//   upload       - multer memory storage; used on the /upload route to receive the file
 // ─────────────────────────────────────────────────────────────────────────────
 
 import express from "express";
@@ -35,7 +35,7 @@ const router = express.Router();
 // GET /api/messages/:societyId
 // Loads the full chat history for a society's private team chat room.
 // Messages are sorted oldest-first (createdAt: 1) so the client can render
-// them in chronological order from top to bottom — matching the natural
+// them in chronological order from top to bottom - matching the natural
 // reading direction of a chat window.
 //
 // Access control logic:

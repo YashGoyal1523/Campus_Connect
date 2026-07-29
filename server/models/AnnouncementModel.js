@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-// Announcement schema — represents a public announcement posted by a society.
+// Announcement schema - represents a public announcement posted by a society.
 // These are visible to ALL students (unlike TeamAnnouncement which is members-only).
 const announcementSchema = new mongoose.Schema({
   // Which society posted this announcement

@@ -74,7 +74,7 @@ const SocietyDashboard = () => {
   };
 
   // Permanently deletes the society's account after an explicit confirmation prompt.
-  // window.confirm is a blocking native dialog — intentionally chosen to be hard to dismiss accidentally.
+  // window.confirm is a blocking native dialog - intentionally chosen to be hard to dismiss accidentally.
   const handleDeleteAccount = async () => {
     if (!window.confirm("Are you sure you want to delete your society account? All posts, events and recruitments will be permanently deleted.")) return;
     try {
@@ -101,7 +101,7 @@ const SocietyDashboard = () => {
   };
 
   // Returns the correct section component based on the active sidebar item.
-  // This is a simple conditional render pattern — no routing needed since the dashboard
+  // This is a simple conditional render pattern - no routing needed since the dashboard
   // is a single-page layout with sidebar navigation.
   const renderSection = () => {
     if (active === "posts") return <PostSection />;
@@ -115,7 +115,7 @@ const SocietyDashboard = () => {
     // min-h-screen ensures the gradient background fills the viewport even on short pages
     <div className="min-h-screen bg-linear-to-br from-slate-900 via-purple-900 to-slate-900 text-white flex flex-col">
 
-      {/* TOP NAVBAR — fixed so it stays visible while the main content scrolls.
+      {/* TOP NAVBAR - fixed so it stays visible while the main content scrolls.
           z-40 keeps it above regular content but below modals (z-50). */}
       <header className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-slate-900/60 backdrop-blur-md fixed top-0 left-0 right-0 z-40">
         <div className="flex items-center gap-3">
@@ -146,7 +146,7 @@ const SocietyDashboard = () => {
       {/* pt-16 offsets the fixed navbar height so the sidebar/content don't slide under it */}
       <div className="flex pt-16">
 
-        {/* LEFT SIDEBAR — also fixed so it stays visible while main content scrolls.
+        {/* LEFT SIDEBAR - also fixed so it stays visible while main content scrolls.
             h-[calc(100vh-4rem)] fills the remaining viewport height below the 4rem navbar.
             z-30 keeps it above content but below the navbar and modals. */}
         <aside className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-56 bg-slate-900/60 backdrop-blur-md border-r border-white/10 flex flex-col py-6 px-3 gap-2 z-30">
@@ -164,7 +164,7 @@ const SocietyDashboard = () => {
           ))}
         </aside>
 
-        {/* MAIN CONTENT — ml-56 offsets the fixed 14rem sidebar.
+        {/* MAIN CONTENT - ml-56 offsets the fixed 14rem sidebar.
             min-h-[calc(100vh-4rem)] ensures the area is always at least full height. */}
         <main className="ml-56 flex-1 p-8 min-h-[calc(100vh-4rem)]">
           {renderSection()}
@@ -172,7 +172,7 @@ const SocietyDashboard = () => {
 
       </div>
 
-      {/* PROFILE MODAL — fixed overlay, z-50 puts it above the sidebar and navbar.
+      {/* PROFILE MODAL - fixed overlay, z-50 puts it above the sidebar and navbar.
           Clicking the backdrop (outer div) closes the modal.
           The absolute black overlay and the relative content panel are siblings so the
           content appears above the blur layer without extra z-index gymnastics. */}
@@ -215,7 +215,7 @@ const SocietyDashboard = () => {
                 </div>
 
                 {/* Detail fields: only rendered when the value is non-empty.
-                    The array + map pattern keeps this DRY — no repeated JSX blocks per field. */}
+                    The array + map pattern keeps this DRY - no repeated JSX blocks per field. */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {[
                     { label: "Email", value: profile.email },

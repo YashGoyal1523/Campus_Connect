@@ -17,7 +17,7 @@ export const createPost = async (req, res) => {
     const mediaType = req.file.mimetype.startsWith("video") ? "video" : "image";
 
     const post = await Post.create({
-      society: req.user.id, // from JWT token — which society is posting
+      society: req.user.id, // from JWT token - which society is posting
       caption,
       mediaUrl,
       mediaType,

@@ -32,13 +32,13 @@ export const initializeSocket = (io) => {
           // Verify the student is actually a member of this society
           // Prevents unauthorized users from sending messages even with a valid token
           const isMember = await TeamMember.findOne({ society: societyId, rollNo: student.rollNo });
-          if (!isMember) return; // silently reject — not a member
+          if (!isMember) return; // silently reject - not a member
 
           senderName = student.name;
           senderRollNo = student.rollNo;
           senderPosition = isMember.position; // e.g. "Tech Lead"
         } else {
-          // Society admin — verify they own this chat room
+          // Society admin - verify they own this chat room
           if (decoded.id !== societyId) return;
 
           // Dynamic import to avoid circular dependency issues
@@ -87,7 +87,7 @@ export const initializeSocket = (io) => {
         const message = await Message.findById(messageId);
         if (!message) return;
 
-        // Permission check — reject if neither the sender nor the admin
+        // Permission check - reject if neither the sender nor the admin
         const isSender = message.senderId === decoded.id;
         const isSocietyAdmin = decoded.role === "society" && decoded.id === societyId;
         if (!isSender && !isSocietyAdmin) return;

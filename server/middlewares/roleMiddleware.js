@@ -10,7 +10,7 @@ const verifyRole = (role) => {
     if (req.user.role !== role) {
       return res.status(403).json({ message: "Access denied. Wrong role." });
     }
-    // Role matches — allow the request to continue
+    // Role matches - allow the request to continue
     next();
   };
 };

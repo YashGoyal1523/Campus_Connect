@@ -17,11 +17,11 @@ const PostSection = () => {
   const [caption, setCaption] = useState("");
   // file: the media file (image or video) selected for upload
   const [file, setFile] = useState(null);
-  // loading: true while the upload request is in progress — disables the submit button
+  // loading: true while the upload request is in progress - disables the submit button
   const [loading, setLoading] = useState(false);
-  // fetching: true during the initial posts fetch — shows the inline skeleton below the form
+  // fetching: true during the initial posts fetch - shows the inline skeleton below the form
   const [fetching, setFetching] = useState(true);
-  // loadingMore: true while fetching additional pages — disables the Load More button
+  // loadingMore: true while fetching additional pages - disables the Load More button
   const [loadingMore, setLoadingMore] = useState(false);
   // hasMore: whether the API has more pages of posts beyond what's already loaded
   const [hasMore, setHasMore] = useState(false);
@@ -66,7 +66,7 @@ const PostSection = () => {
   const handlePost = async (e) => {
     // Prevent the default browser form submission (which would reload the page)
     e.preventDefault();
-    // Guard: file is required — the button would normally be hidden, but this is a safety net
+    // Guard: file is required - the button would normally be hidden, but this is a safety net
     if (!file) return;
     setLoading(true);
     // FormData serializes mixed text+binary data correctly for multipart/form-data requests
@@ -98,7 +98,7 @@ const PostSection = () => {
   };
 
   // handleDelete removes a post by ID from the server and updates local state immediately.
-  // Filtering the local array avoids needing a full re-fetch — the grid updates instantly.
+  // Filtering the local array avoids needing a full re-fetch - the grid updates instantly.
   const handleDelete = async (id) => {
     try {
       const { data } = await axios.delete(backendUrl + `/api/posts/${id}`, { headers: { token } });
@@ -132,7 +132,7 @@ const PostSection = () => {
         </button>
       </form>
 
-      {/* Posts Grid — three separate render branches to handle loading / empty / populated states */}
+      {/* Posts Grid - three separate render branches to handle loading / empty / populated states */}
       {fetching && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {[...Array(6)].map((_, i) => (

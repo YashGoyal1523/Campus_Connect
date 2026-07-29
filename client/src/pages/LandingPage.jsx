@@ -2,8 +2,8 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // This is the very first page a visitor sees when they land on CampusConnect.
 // It serves two purposes:
-//   1. Marketing — explains what the platform does (hero section + feature cards).
-//   2. Auth entry-point — lets both students and societies register or log in
+//   1. Marketing - explains what the platform does (hero section + feature cards).
+//   2. Auth entry-point - lets both students and societies register or log in
 //      through a single shared modal that adapts its fields based on the user type.
 //
 // After a successful login/register the user is redirected to their role-specific
@@ -30,7 +30,7 @@ const LandingPage = () => {
   const [form, setForm] = useState({});
 
   // logoFile is kept separate from `form` because it is a File object (binary),
-  // not a plain string — it needs special handling with FormData before upload
+  // not a plain string - it needs special handling with FormData before upload
   const [logoFile, setLogoFile] = useState(null);
 
   // error stores a server-side or network error message to display inside the modal
@@ -42,7 +42,7 @@ const LandingPage = () => {
 
   const [showPassword, setShowPassword] = useState(false);
 
-  // login comes from AppContext — it stores the user object + JWT token globally
+  // login comes from AppContext - it stores the user object + JWT token globally
   // so every part of the app knows who is logged in
   const { login , backendUrl } = useContext(AppContext);
 
@@ -54,7 +54,7 @@ const LandingPage = () => {
     return () => { document.body.style.overflow = ""; };
   }, [modal]);
 
-  // openModal — called when the user clicks "Student Login" or "Society Login"
+  // openModal - called when the user clicks "Student Login" or "Society Login"
   // Resets all form state so stale data from a previous session is cleared,
   // then opens the modal for the given user type
   const openModal = (type) => {
@@ -66,7 +66,7 @@ const LandingPage = () => {
     setShowPassword(false);
   };
 
-  // closeModal — resets everything and hides the modal
+  // closeModal - resets everything and hides the modal
   // Also triggered when the user clicks the dark overlay behind the modal
   const closeModal = () => {
     setModal(null);
@@ -76,14 +76,14 @@ const LandingPage = () => {
     setShowPassword(false);
   };
 
-  // handleChange — generic controlled-input handler
+  // handleChange - generic controlled-input handler
   // Uses the input's `name` attribute as the key so we can handle any number
   // of fields with one function instead of writing a setter per field
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  // handleSubmit — the core auth function
+  // handleSubmit - the core auth function
   // Decides whether to call register or login, constructs the correct payload,
   // calls the API, stores the result in context, and navigates to the dashboard
   const handleSubmit = async (e) => {
@@ -123,7 +123,7 @@ const LandingPage = () => {
         return;
       }
 
-      // Store only the JWT token — AppContext will fetch user data from backend
+      // Store only the JWT token - AppContext will fetch user data from backend
       login(data.token);
 
       // Show a friendly success notification
@@ -151,7 +151,7 @@ const LandingPage = () => {
           open the modal for the respective user type. */}
       <nav className="flex items-center justify-between px-8 py-5 border-b border-white/10">
         <div className="flex items-center gap-3">
-          {/* Brand icon — a simple coloured square with the letter "C" */}
+          {/* Brand icon - a simple coloured square with the letter "C" */}
           <div className="w-9 h-9 rounded-xl bg-linear-to-br from-purple-400 to-blue-400 flex items-center justify-center font-bold text-lg">C</div>
           <span className="text-xl font-bold tracking-tight">CampusConnect</span>
         </div>
@@ -174,20 +174,20 @@ const LandingPage = () => {
           proposition in one headline. Two CTA buttons mirror the navbar so the
           call-to-action is visible as soon as the user scrolls. */}
       <section className="flex flex-col items-center justify-center text-center px-6 py-24 gap-6">
-        {/* Small badge above the headline — draws the eye before the main title */}
+        {/* Small badge above the headline - draws the eye before the main title */}
         <div className="inline-block px-4 py-1 rounded-full bg-purple-500/20 border border-purple-500/30 text-purple-300 text-sm font-medium mb-2">
           🎓 Your College, Connected
         </div>
-        {/* Main headline — uses a gradient text clip technique for the coloured effect */}
+        {/* Main headline - uses a gradient text clip technique for the coloured effect */}
         <h1 className="text-5xl md:text-7xl font-extrabold leading-tight max-w-4xl bg-linear-to-r from-white via-purple-200 to-blue-300 bg-clip-text text-transparent">
           Discover Every Society On Campus
         </h1>
         {/* Supporting sub-headline that adds more detail to the headline */}
         <p className="text-lg md:text-xl text-white/60 max-w-2xl leading-relaxed">
           CampusConnect is the single platform where students explore college societies,
-          find open recruitments, and never miss an event — all in one place.
+          find open recruitments, and never miss an event - all in one place.
         </p>
-        {/* Duplicate CTAs — placed after the description for users who read before clicking */}
+        {/* Duplicate CTAs - placed after the description for users who read before clicking */}
         <div className="flex flex-col sm:flex-row gap-4 mt-4">
           <button onClick={() => openModal("student")}
             className="px-8 py-4 rounded-2xl bg-linear-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 transition font-semibold text-lg shadow-lg shadow-purple-500/25">
@@ -202,7 +202,7 @@ const LandingPage = () => {
 
       {/* ── FEATURES SECTION ───────────────────────────────────────────────────
           A 3-column card grid explaining the three core feature areas.
-          The data is defined inline as an array of objects and mapped to cards —
+          The data is defined inline as an array of objects and mapped to cards -
           this avoids repeating JSX and makes it easy to add/remove feature cards. */}
       <section className="px-6 py-16 max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
         {[
@@ -251,7 +251,7 @@ const LandingPage = () => {
                   {modal === "student" ? "Student Portal" : "Society Portal"}
                 </p>
               </div>
-              {/* Close button — calls closeModal to hide the modal */}
+              {/* Close button - calls closeModal to hide the modal */}
               <button onClick={closeModal}
                 className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition text-white/60">
                 ✕
@@ -264,7 +264,7 @@ const LandingPage = () => {
                 Registration shows extra fields specific to the user type. */}
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
 
-              {/* Name field — shown only during registration (both types) */}
+              {/* Name field - shown only during registration (both types) */}
               {isRegister && (
                 <input name="name" placeholder="Full Name" onChange={handleChange} required
                   className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm outline-none focus:border-purple-500 transition placeholder:text-white/30" />
@@ -286,7 +286,7 @@ const LandingPage = () => {
                 <>
                   <input name="college" placeholder="College Name" onChange={handleChange} required
                     className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm outline-none focus:border-purple-500 transition placeholder:text-white/30" />
-                  {/* Category dropdown — defines the type of society; used for filtering */}
+                  {/* Category dropdown - defines the type of society; used for filtering */}
                   <select name="category" onChange={handleChange} required
                     className="w-full bg-slate-800 border border-white/10 rounded-xl px-4 py-3 text-sm outline-none focus:border-purple-500 transition text-white/80 appearance-none cursor-pointer">
                     <option value="" disabled selected className="text-white/30">Select Category</option>
@@ -299,7 +299,7 @@ const LandingPage = () => {
                   </select>
                   <textarea name="description" placeholder="Society Description" onChange={handleChange} required rows={3}
                     className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm outline-none focus:border-purple-500 transition placeholder:text-white/30 resize-none" />
-                  {/* Logo upload — optional binary file; stored in logoFile state separately
+                  {/* Logo upload - optional binary file; stored in logoFile state separately
                       because it cannot be serialised to JSON like the other fields */}
                   <div className="w-full">
                     <label className="block text-white/40 text-xs mb-2">Society Logo (optional)</label>
@@ -335,7 +335,7 @@ const LandingPage = () => {
               {/* Inline error message shown when the API returns an error */}
               {error && <p className="text-red-400 text-sm">{error}</p>}
 
-              {/* Submit button — disabled while loading to prevent duplicate requests */}
+              {/* Submit button - disabled while loading to prevent duplicate requests */}
               <button type="submit" disabled={loading}
                 className="w-full py-3 rounded-xl bg-linear-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 transition font-semibold text-sm disabled:opacity-50">
                 {loading ? "Please wait..." : isRegister ? "Create Account" : "Login"}

@@ -15,7 +15,7 @@ export const upload = multer({ storage: multer.memoryStorage() });
 
 // Uploads a file buffer to Cloudinary and returns the result
 // buffer = raw file data in memory (from multer)
-// mimetype = e.g. "image/jpeg", "video/mp4" — used to determine resource type
+// mimetype = e.g. "image/jpeg", "video/mp4" - used to determine resource type
 export const uploadToCloudinary = async (buffer, mimetype) => {
   const resourceType = mimetype.startsWith("video") ? "video" : "image";
 

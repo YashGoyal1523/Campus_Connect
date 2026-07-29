@@ -45,7 +45,7 @@ const TeamManager = () => {
   const [members, setMembers] = useState([]);
   // announcements: team-only announcements visible only to society members
   const [announcements, setAnnouncements] = useState([]);
-  // fetching: true during the initial parallel data fetch — shows the full-page skeleton
+  // fetching: true during the initial parallel data fetch - shows the full-page skeleton
   const [fetching, setFetching] = useState(true);
   // tab: which section is active ("members" | "announcements" | "chat")
   const [tab, setTab] = useState("members");
@@ -84,7 +84,7 @@ const TeamManager = () => {
   }, []); // empty array = run once on mount only
 
   // Submits the Add Member form.
-  // On success, appends the new member returned by the server directly to local state —
+  // On success, appends the new member returned by the server directly to local state -
   // avoiding a full re-fetch while still getting the server-assigned _id.
   const handleAddMember = async (e) => {
     e.preventDefault(); // Prevent browser default form submission
@@ -324,7 +324,7 @@ const TeamManager = () => {
                       <span className="text-white/30 text-xs">{timeAgo(a.createdAt)}</span>
                     </div>
                     <h3 className="font-bold text-sm">{a.title}</h3>
-                    {/* Full content is shown inline — no click-to-expand needed on the society side */}
+                    {/* Full content is shown inline - no click-to-expand needed on the society side */}
                     <p className="text-white/60 text-xs mt-1 leading-relaxed">{a.content}</p>
                   </div>
                   <button onClick={() => handleDeleteAnnouncement(a._id)}

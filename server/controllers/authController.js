@@ -13,7 +13,7 @@ import { uploadToCloudinary } from "../utils/cloudinary.js";
 
 // ─── DELETE ACCOUNT ───────────────────────────────────────────────────────────
 // Deletes the logged-in user's account along with ALL their related data
-// This is called "cascade delete" — removing all dependent records
+// This is called "cascade delete" - removing all dependent records
 export const deleteAccount = async (req, res) => {
   try {
     if (req.user.role === "student") {
@@ -29,7 +29,7 @@ export const deleteAccount = async (req, res) => {
         Message.deleteMany({ senderId: req.user.id }),     // remove their chat messages
       ]);
     } else {
-      // Society account deletion — remove everything the society ever created
+      // Society account deletion - remove everything the society ever created
       await Promise.all([
         Society.findByIdAndDelete(req.user.id),
         Post.deleteMany({ society: req.user.id }),
@@ -87,7 +87,7 @@ export const registerStudent = async (req, res) => {
 
     const student = await Student.create({ name, email, password: hashedPassword, college, rollNo });
 
-    // Create JWT token — stores id, role, name inside it
+    // Create JWT token - stores id, role, name inside it
     // expiresIn: "7d" means token expires after 7 days
     const token = jwt.sign(
       { id: student._id, role: "student", name: student.name },

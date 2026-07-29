@@ -16,9 +16,9 @@ const RecruitmentManager = () => {
   const [recruitments, setRecruitments] = useState([]);
   // form: controlled state object for all fields in the create-recruitment form
   const [form, setForm] = useState({ role: "", description: "", googleFormLink: "", deadline: "" });
-  // loading: true while the POST request is in progress — disables the submit button
+  // loading: true while the POST request is in progress - disables the submit button
   const [loading, setLoading] = useState(false);
-  // fetching: true during the initial GET — shows the inline skeleton
+  // fetching: true during the initial GET - shows the inline skeleton
   const [fetching, setFetching] = useState(true);
   // selected: the recruitment currently displayed in the detail modal; null = no modal
   const [selected, setSelected] = useState(null);
@@ -109,7 +109,7 @@ const RecruitmentManager = () => {
         </button>
       </form>
 
-      {/* Recruitments list — three branches: loading / empty / populated */}
+      {/* Recruitments list - three branches: loading / empty / populated */}
       {fetching && (
         <div className="flex flex-col gap-4">
           {[...Array(4)].map((_, i) => (

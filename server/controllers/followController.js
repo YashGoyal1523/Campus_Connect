@@ -34,7 +34,7 @@ export const unfollowSociety = async (req, res) => {
 
 // ─── GET PERSONALIZED FEED ────────────────────────────────────────────────────
 // Returns posts ONLY from societies the student follows
-// This is the core of the feed feature — personalized content
+// This is the core of the feed feature - personalized content
 export const getFeed = async (req, res) => {
   try {
     const { page, limit, skip } = getPagination(req.query);
@@ -42,7 +42,7 @@ export const getFeed = async (req, res) => {
     const student = await Student.findById(req.user.id);
     if (!student) return res.status(404).json({ success: false, message: "Student not found" });
 
-    // $in operator — fetch posts where society field matches ANY id in the following array
+    // $in operator - fetch posts where society field matches ANY id in the following array
     // This is how we get posts from ALL followed societies in one query
     const total = await Post.countDocuments({ society: { $in: student.following } });
     const posts = await Post.find({ society: { $in: student.following } })

@@ -5,7 +5,7 @@ import { toast } from "react-hot-toast";
 
 // Ensures any URL has a protocol prefix so anchor tags navigate correctly.
 // Some societies paste links like "forms.google.com/..." without "https://",
-// which browsers interpret as a relative URL — this guard fixes that.
+// which browsers interpret as a relative URL - this guard fixes that.
 const toAbsoluteUrl = (url) => url?.startsWith("http") ? url : `https://${url}`;
 
 // Recruitment page: shows a paginated, searchable list of open society recruitment postings.
@@ -50,7 +50,7 @@ const Recruitment = () => {
     return () => { document.body.style.overflow = ""; };
   }, [selected]);
 
-  // Initial data load — empty dependency array means this runs exactly once on mount
+  // Initial data load - empty dependency array means this runs exactly once on mount
   useEffect(() => { fetchData(); }, []);
 
   // Increments the page counter and fetches the next batch without clearing the list
@@ -70,7 +70,7 @@ const Recruitment = () => {
   );
 
   // Client-side search: filters by role name or society name.
-  // startsWith is used rather than includes() so the search feels fast and intentional —
+  // startsWith is used rather than includes() so the search feels fast and intentional -
   // the query must match the beginning of the string, reducing noise in results.
   const filtered = recruitments.filter((r) => {
     const q = search.toLowerCase();
@@ -119,7 +119,7 @@ const Recruitment = () => {
                   <span className="text-white/40 text-xs">
                     Deadline: {deadline.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
                   </span>
-                  {/* The Apply button is hidden if the posting has expired or has no form link —
+                  {/* The Apply button is hidden if the posting has expired or has no form link -
                       no point directing someone to apply when the deadline has passed */}
                   {!isExpired && r.googleFormLink && (
                     <a href={toAbsoluteUrl(r.googleFormLink)} target="_blank" rel="noreferrer"

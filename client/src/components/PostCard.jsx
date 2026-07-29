@@ -21,7 +21,7 @@ const PostCard = ({ post, onClick, onDelete }) => {
           : <video src={post.mediaUrl} className="w-full h-full object-cover" />}
       </div>
 
-      {/* Only render the caption paragraph if one actually exists —
+      {/* Only render the caption paragraph if one actually exists -
           avoids leaving an empty padded block when caption is null/undefined */}
       {/* line-clamp-3 truncates long captions to 3 lines with an ellipsis,
           keeping the card compact and uniform in height */}
@@ -33,10 +33,10 @@ const PostCard = ({ post, onClick, onDelete }) => {
       {onDelete && (
         <button
           // e.stopPropagation() prevents the click from bubbling up to the parent div's onClick,
-          // which would open the lightbox at the same time as deleting the post — two conflicting actions
+          // which would open the lightbox at the same time as deleting the post - two conflicting actions
           onClick={(e) => { e.stopPropagation(); onDelete(post._id); }}
           // opacity-0 hides the button by default; group-hover:opacity-100 reveals it only when
-          // the user hovers over the card — keeps the UI clean until the action is intentional
+          // the user hovers over the card - keeps the UI clean until the action is intentional
           className="absolute top-2 right-2 w-8 h-8 rounded-full bg-red-500/80 hover:bg-red-500 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition"
         >
           🗑

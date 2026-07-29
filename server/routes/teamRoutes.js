@@ -5,27 +5,27 @@
 //
 // There are two groups of routes in this file:
 //
-//   SOCIETY ADMIN ROUTES — for a society managing its own team:
-//     GET    /api/team/members                         — list all members of the society
-//     POST   /api/team/members                         — add a student as a team member
-//     DELETE /api/team/members/:id                     — remove a member
-//     GET    /api/team/announcements                   — list internal team announcements
-//     POST   /api/team/announcements                   — post a new team announcement
-//     DELETE /api/team/announcements/:id               — delete a team announcement
+//   SOCIETY ADMIN ROUTES - for a society managing its own team:
+//     GET    /api/team/members                         - list all members of the society
+//     POST   /api/team/members                         - add a student as a team member
+//     DELETE /api/team/members/:id                     - remove a member
+//     GET    /api/team/announcements                   - list internal team announcements
+//     POST   /api/team/announcements                   - post a new team announcement
+//     DELETE /api/team/announcements/:id               - delete a team announcement
 //
-//   STUDENT ROUTES — for a student viewing their team memberships:
-//     GET    /api/team/my-societies                    — list societies the student is a member of
-//     GET    /api/team/society/:societyId/members      — member list of a specific society
-//     GET    /api/team/society/:societyId/announcements — announcements of a specific society
+//   STUDENT ROUTES - for a student viewing their team memberships:
+//     GET    /api/team/my-societies                    - list societies the student is a member of
+//     GET    /api/team/society/:societyId/members      - member list of a specific society
+//     GET    /api/team/society/:societyId/announcements - announcements of a specific society
 //
-// Key design decision — role separation:
+// Key design decision - role separation:
 //   Society admins manage team structure; students view it. The same data
 //   is accessible from both sides but through different, role-guarded endpoints.
 //   This prevents a student from adding/removing members or posting announcements.
 //
 // Middleware used:
-//   verifyToken  — required on ALL routes (team data is always private/internal)
-//   verifyRole   — "society" for admin routes, "student" for student-facing routes
+//   verifyToken  - required on ALL routes (team data is always private/internal)
+//   verifyRole   - "society" for admin routes, "student" for student-facing routes
 // ─────────────────────────────────────────────────────────────────────────────
 
 import express from "express";
@@ -61,7 +61,7 @@ router.delete("/members/:id", verifyToken, verifyRole("society"), removeMember);
 
 // GET /api/team/announcements
 // Returns all internal team announcements posted by the currently logged-in society.
-// These are private — visible only to the society admin and their team members.
+// These are private - visible only to the society admin and their team members.
 router.get("/announcements", verifyToken, verifyRole("society"), getTeamAnnouncements);
 
 // POST /api/team/announcements

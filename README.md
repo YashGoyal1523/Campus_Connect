@@ -1,6 +1,6 @@
 # CampusConnect
 
-A full-stack campus community platform where college societies manage their presence and students stay connected — featuring real-time group chat, personalized feeds, team management, and more.
+A full-stack campus community platform where college societies manage their presence and students stay connected, featuring real-time group chat, personalized feeds, team management, and more.
 
 ---
 
@@ -21,7 +21,7 @@ A full-stack campus community platform where college societies manage their pres
 - Post events, recruitment drives, and public announcements
 - Manage team members with roles/positions
 - Post internal team announcements (visible only to members)
-- Real-time group chat with team — send text and media, delete any message
+- Real-time group chat with team: send text and media, delete any message
 
 ---
 
@@ -105,11 +105,11 @@ VITE_SOCKET_URL=http://localhost:8000
 
 ### 4. Run the app
 ```bash
-# Terminal 1 — start backend
+# Terminal 1 - start backend
 cd server
 npm run server
 
-# Terminal 2 — start frontend
+# Terminal 2 - start frontend
 cd client
 npm run dev
 ```
@@ -156,11 +156,11 @@ App runs at `http://localhost:5173`
 
 ## Key Design Decisions
 
-- **JWT over sessions** — stateless auth, scales horizontally without shared session store
-- **Socket.io rooms** — each society has an isolated room, messages only go to members of that room
-- **rollNo as team link** — societies add members by roll number; students are matched at login without needing their account ID
-- **Cascade deletes** — deleting an account removes all associated posts, events, messages, team records, and following references in one atomic `Promise.all`
-- **Pagination** — all list endpoints use skip/limit with a `hasMore` flag; frontend appends on "Load More"
-- **Cloudinary** — files go to memory via multer, then streamed to Cloudinary as base64; no disk storage needed on the server
+- **JWT over sessions** - stateless auth, scales horizontally without shared session store
+- **Socket.io rooms** - each society has an isolated room, messages only go to members of that room
+- **rollNo as team link** - societies add members by roll number; students are matched at login without needing their account ID
+- **Cascade deletes** - deleting an account removes all associated posts, events, messages, team records, and following references in one atomic `Promise.all`
+- **Pagination** - all list endpoints use skip/limit with a `hasMore` flag; frontend appends on "Load More"
+- **Cloudinary** - files go to memory via multer, then streamed to Cloudinary as base64; no disk storage needed on the server
 
 

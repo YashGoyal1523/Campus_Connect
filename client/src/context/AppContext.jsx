@@ -19,7 +19,7 @@ export const AppProvider = ({ children }) => {
       if (!data.success) { toast.error(data.message); return; }
       setUser(data.user);
     } catch (e) {
-      // Token expired or invalid — clear auth state
+      // Token expired or invalid - clear auth state
       localStorage.removeItem("token");
       setToken(null);
       setUser(null);
@@ -28,7 +28,7 @@ export const AppProvider = ({ children }) => {
     }
   };
 
-  // On token change (login, logout, page reload) — fetch fresh user from backend
+  // On token change (login, logout, page reload) - fetch fresh user from backend
   useEffect(() => {
     if (token) {
       loadUserData();
@@ -37,7 +37,7 @@ export const AppProvider = ({ children }) => {
     }
   }, [token]);
 
-  // Called after successful login/register — only token is stored in localStorage
+  // Called after successful login/register - only token is stored in localStorage
   const login = (tokenData) => {
     localStorage.setItem("token", tokenData);
     setToken(tokenData);

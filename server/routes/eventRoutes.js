@@ -4,19 +4,19 @@
 // Mounted at /api/events in the main server file.
 //
 // Full paths:
-//   GET    /api/events           — list ALL upcoming events (public)
-//   POST   /api/events           — create a new event with an optional poster (society only)
-//   GET    /api/events/my        — list only THIS society's events (society only)
-//   DELETE /api/events/:id       — delete a specific event (society only)
+//   GET    /api/events           - list ALL upcoming events (public)
+//   POST   /api/events           - create a new event with an optional poster (society only)
+//   GET    /api/events/my        - list only THIS society's events (society only)
+//   DELETE /api/events/:id       - delete a specific event (society only)
 //
 // Route ordering note:
-//   "/my" is defined before "/:id" for the same reason as in recruitmentRoutes —
+//   "/my" is defined before "/:id" for the same reason as in recruitmentRoutes -
 //   to prevent Express from interpreting the literal string "my" as a MongoDB ID.
 //
 // Middleware used:
-//   verifyToken  — validates JWT; required on write and society-scoped routes
-//   verifyRole   — restricts writes and "/my" to the "society" role only
-//   upload       — multer middleware; parses the optional event poster image
+//   verifyToken  - validates JWT; required on write and society-scoped routes
+//   verifyRole   - restricts writes and "/my" to the "society" role only
+//   upload       - multer middleware; parses the optional event poster image
 // ─────────────────────────────────────────────────────────────────────────────
 
 import express from "express";
@@ -34,18 +34,18 @@ const router = express.Router();
 
 // GET /api/events
 // Returns all events across every society on the platform.
-// Public — no auth required. Used on the student-facing events discovery page
+// Public - no auth required. Used on the student-facing events discovery page
 // so students can see what's happening across campus without logging in.
 router.get("/", getAllEvents);
 
 // POST /api/events
 // Creates a new event for the authenticated society.
 // Middleware chain:
-//   1. verifyToken          — ensures the request has a valid JWT
-//   2. verifyRole("society") — only society accounts can create events
-//   3. upload.single("poster") — parses an optional poster image from the request
+//   1. verifyToken          - ensures the request has a valid JWT
+//   2. verifyRole("society") - only society accounts can create events
+//   3. upload.single("poster") - parses an optional poster image from the request
 //      The field name "poster" must match what the client sends in FormData
-//   4. createEvent          — controller: saves the event and uploads the poster to Cloudinary
+//   4. createEvent          - controller: saves the event and uploads the poster to Cloudinary
 router.post("/", verifyToken, verifyRole("society"), upload.single("poster"), createEvent);
 
 // GET /api/events/my

@@ -8,7 +8,7 @@ import Student from "../models/StudentModel.js";
 
 // ─── GET MY SOCIETIES ─────────────────────────────────────────────────────────
 // Returns all societies the logged-in student belongs to as a team member
-// Matches by rollNo — society adds student by roll number, not account ID
+// Matches by rollNo - society adds student by roll number, not account ID
 export const getMySocieties = async (req, res) => {
   try {
     const student = await Student.findById(req.user.id);
@@ -26,7 +26,7 @@ export const getMySocieties = async (req, res) => {
 };
 
 // ─── GET MEMBERS OF A SPECIFIC SOCIETY ───────────────────────────────────────
-// Returns full team roster — shown in "Members" tab inside a society
+// Returns full team roster - shown in "Members" tab inside a society
 export const getSocietyMembers = async (req, res) => {
   try {
     const members = await TeamMember.find({ society: req.params.societyId })
@@ -38,7 +38,7 @@ export const getSocietyMembers = async (req, res) => {
 };
 
 // ─── GET TEAM ANNOUNCEMENTS FOR A SPECIFIC SOCIETY ───────────────────────────
-// Internal announcements — only visible to verified team members
+// Internal announcements - only visible to verified team members
 // Gate: student must be a TeamMember of this society to access
 export const getSocietyTeamAnnouncements = async (req, res) => {
   try {
@@ -67,7 +67,7 @@ export const getSocietyTeamAnnouncements = async (req, res) => {
 
 // ─── ADD MEMBER ───────────────────────────────────────────────────────────────
 // Society manually adds a student to their team by entering name, roll no, position
-// No link to student account — stored independently in TeamMember collection
+// No link to student account - stored independently in TeamMember collection
 export const addMember = async (req, res) => {
   try {
     const { name, rollNo, position } = req.body;
@@ -112,7 +112,7 @@ export const removeMember = async (req, res) => {
 };
 
 // ─── POST TEAM ANNOUNCEMENT ───────────────────────────────────────────────────
-// Internal announcement — only visible to team members, not public students
+// Internal announcement - only visible to team members, not public students
 export const postTeamAnnouncement = async (req, res) => {
   try {
     const { title, content } = req.body;

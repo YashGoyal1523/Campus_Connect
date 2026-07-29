@@ -18,9 +18,9 @@ const EventManager = () => {
   const [form, setForm] = useState({ title: "", description: "", date: "", venue: "", googleFormLink: "" });
   // poster: the optional image file selected for the event poster
   const [poster, setPoster] = useState(null);
-  // loading: true while the POST request to create an event is in progress — disables submit
+  // loading: true while the POST request to create an event is in progress - disables submit
   const [loading, setLoading] = useState(false);
-  // fetching: true during the initial GET — shows the inline skeleton
+  // fetching: true during the initial GET - shows the inline skeleton
   const [fetching, setFetching] = useState(true);
   // selected: the event whose detail modal is open; null = no modal
   const [selected, setSelected] = useState(null);
@@ -52,14 +52,14 @@ const EventManager = () => {
 
   // handleSubmit creates a new event.
   // Because the form may include a poster image, we use FormData (multipart/form-data)
-  // rather than a plain JSON body — servers require multipart for file uploads.
+  // rather than a plain JSON body - servers require multipart for file uploads.
   const handleSubmit = async (e) => {
     e.preventDefault(); // Prevent browser default form submission / page reload
     setLoading(true);
     const formData = new FormData();
     // Object.entries iterates all form fields and appends them to FormData in one pass
     Object.entries(form).forEach(([k, v]) => formData.append(k, v));
-    // poster is optional — only append it when the user actually chose a file
+    // poster is optional - only append it when the user actually chose a file
     if (poster) formData.append("poster", poster);
     try {
       const { data } = await axios.post(backendUrl + "/api/events", formData, { headers: { token } });
@@ -119,7 +119,7 @@ const EventManager = () => {
           <input name="venue" placeholder="Venue" value={form.venue} onChange={handleChange} required
             className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm outline-none focus:border-purple-500 transition placeholder:text-white/30" />
         </div>
-        {/* Google Form link is optional — parenthetical note is shown in placeholder */}
+        {/* Google Form link is optional - parenthetical note is shown in placeholder */}
         <input name="googleFormLink" placeholder="Google Form Link (optional)" value={form.googleFormLink} onChange={handleChange}
           className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm outline-none focus:border-purple-500 transition placeholder:text-white/30" />
         {/* Poster file input: uncontrolled by React, so we read files[0] directly */}
@@ -131,7 +131,7 @@ const EventManager = () => {
         </button>
       </form>
 
-      {/* Event list — three render branches: loading / empty / populated */}
+      {/* Event list - three render branches: loading / empty / populated */}
       {fetching && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {[...Array(6)].map((_, i) => (
@@ -205,7 +205,7 @@ const EventManager = () => {
                 <p>🗓 {new Date(selected.date).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}</p>
               </div>
               <div className="flex gap-3">
-                {/* "View Form" link — only shown when the event has a registration link */}
+                {/* "View Form" link - only shown when the event has a registration link */}
                 {selected.googleFormLink && (
                   <a href={toAbsoluteUrl(selected.googleFormLink)} target="_blank" rel="noreferrer"
                     className="flex-1 text-center py-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition text-sm">

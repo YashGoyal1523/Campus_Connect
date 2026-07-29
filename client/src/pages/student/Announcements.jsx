@@ -20,7 +20,7 @@ const Announcements = () => {
 
   // announcements: the accumulated list fetched from the server
   const [announcements, setAnnouncements] = useState([]);
-  // loading: true only during the initial page load — shows the full-page skeleton
+  // loading: true only during the initial page load - shows the full-page skeleton
   const [loading, setLoading] = useState(true);
   // loadingMore: prevents duplicate Load More requests while one is already in-flight
   const [loadingMore, setLoadingMore] = useState(false);
@@ -76,7 +76,7 @@ const Announcements = () => {
   );
 
   // Client-side filter: runs synchronously on each render using the current search string.
-  // Using startsWith rather than includes keeps results tightly focused —
+  // Using startsWith rather than includes keeps results tightly focused -
   // matching only items that begin with the typed query.
   const filtered = announcements.filter((a) => {
     const q = search.toLowerCase();
@@ -121,7 +121,7 @@ const Announcements = () => {
                     enabling truncation/clamping to work as expected */}
                 <div className="min-w-0">
                   <h3 className="font-bold text-sm mb-1">{a.title}</h3>
-                  {/* line-clamp-2 shows a preview of the content — user clicks to read the full text */}
+                  {/* line-clamp-2 shows a preview of the content - user clicks to read the full text */}
                   <p className="text-white/60 text-sm leading-relaxed line-clamp-2">{a.content}</p>
                 </div>
               </div>
@@ -131,7 +131,7 @@ const Announcements = () => {
       )}
 
       {/* Load More is hidden while the user is actively searching,
-          because filtering is client-side — all needed data is already loaded */}
+          because filtering is client-side - all needed data is already loaded */}
       {hasMore && !search && (
         <div className="flex justify-center mt-8">
           <button onClick={handleLoadMore} disabled={loadingMore}
@@ -168,7 +168,7 @@ const Announcements = () => {
                 className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/60 transition shrink-0 ml-3">✕</button>
             </div>
             <div className="px-6 py-5 overflow-y-auto">
-              {/* Full content — no clamping here unlike in the list preview */}
+              {/* Full content - no clamping here unlike in the list preview */}
               <p className="text-white/70 text-sm leading-relaxed">{selected.content}</p>
               <p className="text-white/30 text-xs mt-4">{timeAgo(selected.createdAt)}</p>
             </div>

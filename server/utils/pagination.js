@@ -5,7 +5,7 @@ export const getPagination = (query) => {
   // Math.max(1, ...) ensures page is never 0 or negative
   const page = Math.max(1, parseInt(query.page) || 1);
 
-  // Math.min(50, ...) caps limit at 50 — prevents fetching 99999 records at once
+  // Math.min(50, ...) caps limit at 50 - prevents fetching 99999 records at once
   // Math.max(1, ...) ensures limit is never 0 or negative
   const limit = Math.min(50, Math.max(1, parseInt(query.limit) || 10));
 

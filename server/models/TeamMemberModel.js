@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 // TeamMember is NOT linked to a Student account by ID
-// Instead it's linked by rollNo — society adds members manually by entering their roll number
+// Instead it's linked by rollNo - society adds members manually by entering their roll number
 // This way the student doesn't need to have registered on the platform to be in a team
 // When the student logs in, their rollNo is used to find their TeamMember records
 const teamMemberSchema = new mongoose.Schema({

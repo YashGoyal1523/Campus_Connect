@@ -8,7 +8,7 @@
 //   - Fetch all societies with pagination (for the student discovery feed)
 //   - Fetch a single society by its MongoDB _id (for profile pages)
 //
-// Design decision — password never leaves the server:
+// Design decision - password never leaves the server:
 //   Every query uses `.select("-password")` to exclude the hashed password from
 //   the response. This is a critical security practice; even hashed passwords
 //   should not be exposed to the client.
@@ -31,7 +31,7 @@ import { getPagination } from "../utils/pagination.js"; // helper that extracts 
 //   `hasMore` tells the client whether another page exists so it knows whether
 //   to show the "Load More" button.
 //
-// This route is PUBLIC — no auth token required, because students on the
+// This route is PUBLIC - no auth token required, because students on the
 // discovery page should be able to browse without logging in.
 export const getAllSocieties = async (req, res) => {
   try {
@@ -62,10 +62,10 @@ export const getAllSocieties = async (req, res) => {
 // Use case: when a student clicks on a society card, the app navigates to a
 // detail page which calls this endpoint to fetch complete profile data.
 //
-// Returns 404 if no society with the given ID exists — important for meaningful
+// Returns 404 if no society with the given ID exists - important for meaningful
 // error messages instead of a cryptic null/undefined crash on the client.
 //
-// This route is PUBLIC — no auth required.
+// This route is PUBLIC - no auth required.
 export const getSocietyById = async (req, res) => {
   try {
     // req.params.id is extracted from the URL pattern "/:id"

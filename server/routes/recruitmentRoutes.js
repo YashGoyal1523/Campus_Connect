@@ -4,10 +4,10 @@
 // Mounted at /api/recruitments in the main server file.
 //
 // Full paths:
-//   GET    /api/recruitments        — list ALL active recruitments (public)
-//   POST   /api/recruitments        — create a new recruitment post (society only)
-//   GET    /api/recruitments/my     — list only THIS society's recruitments (society only)
-//   DELETE /api/recruitments/:id    — delete a specific recruitment (society only)
+//   GET    /api/recruitments        - list ALL active recruitments (public)
+//   POST   /api/recruitments        - create a new recruitment post (society only)
+//   GET    /api/recruitments/my     - list only THIS society's recruitments (society only)
+//   DELETE /api/recruitments/:id    - delete a specific recruitment (society only)
 //
 // Route ordering note:
 //   "/my" must be defined BEFORE "/:id".
@@ -15,15 +15,15 @@
 //   GET /api/recruitments/my would treat "my" as a MongoDB ObjectId and fail
 //   with a CastError. Static segment paths must always precede dynamic ones.
 //
-// Design — dual GET routes:
+// Design - dual GET routes:
 //   - "/" is public and returns every recruitment across all societies.
 //     Used on the student-facing global recruitments discovery page.
 //   - "/my" is protected and returns only the requesting society's own postings.
 //     Used on the society dashboard to manage their open positions.
 //
 // Middleware used:
-//   verifyToken  — validates JWT on protected routes
-//   verifyRole   — restricts write/society-scoped routes to the "society" role
+//   verifyToken  - validates JWT on protected routes
+//   verifyRole   - restricts write/society-scoped routes to the "society" role
 // ─────────────────────────────────────────────────────────────────────────────
 
 import express from "express";
@@ -40,7 +40,7 @@ const router = express.Router();
 
 // GET /api/recruitments
 // Returns all open recruitment posts from every society.
-// Public — no auth needed. Students can browse recruitments even before logging in.
+// Public - no auth needed. Students can browse recruitments even before logging in.
 router.get("/", getAllRecruitments);
 
 // POST /api/recruitments

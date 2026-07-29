@@ -14,7 +14,7 @@ const AnnouncementManager = () => {
   const [form, setForm] = useState({ title: "", content: "" });
   // loading: true while the POST request to create an announcement is in progress
   const [loading, setLoading] = useState(false);
-  // fetching: true during the initial GET request — shows the inline skeleton
+  // fetching: true during the initial GET request - shows the inline skeleton
   const [fetching, setFetching] = useState(true);
   // selected: the announcement whose full-content modal is open; null = no modal
   const [selected, setSelected] = useState(null);
@@ -83,7 +83,7 @@ const AnnouncementManager = () => {
     }
   };
 
-  // Local helper for relative timestamps — scoped here because it's only needed in this component
+  // Local helper for relative timestamps - scoped here because it's only needed in this component
   const timeAgo = (date) => {
     const diff = Math.floor((Date.now() - new Date(date)) / 1000);
     if (diff < 60) return `${diff}s ago`;
@@ -113,7 +113,7 @@ const AnnouncementManager = () => {
         </button>
       </form>
 
-      {/* List of existing announcements — three branches: loading / empty / populated */}
+      {/* List of existing announcements - three branches: loading / empty / populated */}
       {fetching && (
         <div className="flex flex-col gap-4">
           {[...Array(4)].map((_, i) => (

@@ -4,7 +4,7 @@ const messageSchema = new mongoose.Schema({
   // Which society's group chat this message belongs to
   society: { type: mongoose.Schema.Types.ObjectId, ref: "Society", required: true },
 
-  // ID of the sender — used to verify ownership on delete (unsend)
+  // ID of the sender - used to verify ownership on delete (unsend)
   // Stored as String (not ObjectId ref) because sender can be Student OR Society
   senderId: { type: String, required: true },
 

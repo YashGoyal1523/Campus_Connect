@@ -10,7 +10,7 @@ import Feed from "./Feed";
 import Announcements from "./Announcements";
 import MySocieties from "./MySocieties";
 
-// StudentDashboard — the main shell for all student-facing pages.
+// StudentDashboard - the main shell for all student-facing pages.
 // It renders a fixed top navbar, a fixed left sidebar, and a main content area.
 // The active tab controls which page component is rendered inside the main area.
 
@@ -89,7 +89,7 @@ const StudentDashboard = () => {
   };
 
   // Permanently deletes the account after a confirmation dialog, then logs the user out.
-  // window.confirm is a native browser dialog — no UI library needed for a destructive action.
+  // window.confirm is a native browser dialog - no UI library needed for a destructive action.
   const handleDeleteAccount = async () => {
     if (!window.confirm("Are you sure you want to delete your account? This cannot be undone.")) return;
     try {
@@ -117,7 +117,7 @@ const StudentDashboard = () => {
     // min-h-screen ensures the background covers the full viewport even on short pages
     <div className="min-h-screen bg-linear-to-br from-slate-900 via-purple-900 to-slate-900 text-white flex flex-col">
 
-      {/* TOP NAVBAR — fixed at the top (z-40) so it stays visible while scrolling.
+      {/* TOP NAVBAR - fixed at the top (z-40) so it stays visible while scrolling.
           backdrop-blur-md gives a frosted-glass effect over the scrolling content. */}
       <header className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-slate-900/60 backdrop-blur-md fixed top-0 left-0 right-0 z-40">
         <div className="flex items-center gap-3">
@@ -144,7 +144,7 @@ const StudentDashboard = () => {
       {/* pt-16 offsets the content below the fixed navbar (navbar height ≈ 4rem = 64px) */}
       <div className="flex pt-16">
 
-        {/* LEFT SIDEBAR — fixed on the left (z-30, below navbar z-40).
+        {/* LEFT SIDEBAR - fixed on the left (z-30, below navbar z-40).
             h-[calc(100vh-4rem)] makes it fill the remaining viewport height below the navbar. */}
         <aside className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-56 bg-slate-900/60 backdrop-blur-md border-r border-white/10 flex flex-col py-6 px-3 gap-2 z-30">
           <p className="text-white/30 text-xs font-semibold uppercase tracking-widest px-3 mb-2">Menu</p>
@@ -161,14 +161,14 @@ const StudentDashboard = () => {
           ))}
         </aside>
 
-        {/* MAIN CONTENT — ml-56 offsets it by the sidebar width so they don't overlap */}
+        {/* MAIN CONTENT - ml-56 offsets it by the sidebar width so they don't overlap */}
         <main className="ml-56 flex-1 p-8 min-h-[calc(100vh-4rem)]">
           {renderSection()}
         </main>
 
       </div>
 
-      {/* PROFILE MODAL — z-50 sits above navbar (z-40) and sidebar (z-30).
+      {/* PROFILE MODAL - z-50 sits above navbar (z-40) and sidebar (z-30).
           Clicking the backdrop (outer div) closes the modal;
           stopPropagation on the inner panel prevents clicks inside from bubbling out. */}
       {profileOpen && (
@@ -208,12 +208,12 @@ const StudentDashboard = () => {
                 ].map(({ label, value }) => (
                   <div key={label} className="rounded-xl bg-white/5 border border-white/10 px-4 py-3">
                     <p className="text-white/40 text-xs mb-1">{label}</p>
-                    {/* "—" fallback so the card never looks empty */}
-                    <p className="text-sm font-medium">{value || "—"}</p>
+                    {/* "-" fallback so the card never looks empty */}
+                    <p className="text-sm font-medium">{value || "-"}</p>
                   </div>
                 ))}
 
-                {/* Society memberships — only shown if the student belongs to at least one team */}
+                {/* Society memberships - only shown if the student belongs to at least one team */}
                 {memberships.length > 0 && (
                   <div className="rounded-xl bg-white/5 border border-white/10 px-4 py-3">
                     <p className="text-white/40 text-xs mb-3">My Societies ({memberships.length})</p>
@@ -233,7 +233,7 @@ const StudentDashboard = () => {
                   </div>
                 )}
 
-                {/* Following list — only shown if the student follows at least one society */}
+                {/* Following list - only shown if the student follows at least one society */}
                 {profile.following?.length > 0 && (
                   <div className="rounded-xl bg-white/5 border border-white/10 px-4 py-3">
                     <p className="text-white/40 text-xs mb-3">Following ({profile.following.length})</p>

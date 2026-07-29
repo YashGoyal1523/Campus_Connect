@@ -184,7 +184,7 @@ const Discover = () => {
               key={s._id}
               society={s}
               onClick={() => openSociety(s)}
-              // Derived from the local `following` array — updates instantly after toggleFollow
+              // Derived from the local `following` array - updates instantly after toggleFollow
               isFollowing={following.includes(s._id)}
               onToggleFollow={toggleFollow}
             />
@@ -193,7 +193,7 @@ const Discover = () => {
       )}
 
       {/* Load More: hidden when the user is filtering by search or category,
-          because those filters operate on already-fetched data —
+          because those filters operate on already-fetched data -
           loading more without those server-side filters would produce inconsistent results */}
       {hasMore && !search && activeCategory === "All" && (
         <div className="flex justify-center mt-8">
@@ -250,7 +250,7 @@ const Discover = () => {
 
               <p className="text-white/60 text-sm leading-relaxed mb-6">{selected.description}</p>
 
-              {/* Social links — only shown when the society has configured them */}
+              {/* Social links - only shown when the society has configured them */}
               <div className="flex gap-3 mb-6">
                 {selected.instagramLink && (
                   <a href={selected.instagramLink} target="_blank" rel="noreferrer"

@@ -27,7 +27,7 @@ app.use(express.json());
 // Connect to MongoDB database
 await connectDB();
 
-// Socket.io requires an HTTP server — wrap express app inside it
+// Socket.io requires an HTTP server - wrap express app inside it
 // This way both REST API and WebSocket connections use the same port
 const httpServer = createServer(app);
 

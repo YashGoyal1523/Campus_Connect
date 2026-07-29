@@ -18,9 +18,9 @@ const timeAgo = (date) => {
 };
 
 // Props:
-// societyId — which society's chat room to connect to
-// currentUserName — to identify which messages are "mine" (right-aligned)
-// currentUserRole — "student" or "society" (society can delete any message)
+// societyId - which society's chat room to connect to
+// currentUserName - to identify which messages are "mine" (right-aligned)
+// currentUserRole - "student" or "society" (society can delete any message)
 const GroupChat = ({ societyId, currentUserName, currentUserRole }) => {
   const { token , backendUrl } = useContext(AppContext);
 
@@ -56,7 +56,7 @@ const GroupChat = ({ societyId, currentUserName, currentUserRole }) => {
     // ── LISTEN FOR NEW MESSAGES ──────────────────────────────────────────────
     // Named handler references are required so cleanup removes only THIS component's
     // listeners. socket.off("event") without a reference removes ALL listeners for
-    // that event — risky if the socket is shared. Named refs fix the duplicate-message bug.
+    // that event - risky if the socket is shared. Named refs fix the duplicate-message bug.
     const handleReceive = (msg) => setMessages((prev) => [...prev, msg]);
     const handleDelete = ({ messageId }) => setMessages((prev) => prev.filter((msg) => msg._id !== messageId));
 
@@ -86,7 +86,7 @@ const GroupChat = ({ societyId, currentUserName, currentUserRole }) => {
     let attachmentType = "";
 
     // ── UPLOAD MEDIA FIRST (if file selected) ────────────────────────────────
-    // Socket.io only carries text — actual file goes to Cloudinary via HTTP
+    // Socket.io only carries text - actual file goes to Cloudinary via HTTP
     // We get back a URL, then send that URL through the socket
     if (file) {
       setUploading(true);
@@ -169,7 +169,7 @@ const GroupChat = ({ societyId, currentUserName, currentUserRole }) => {
               )}
 
               <div className={`flex items-center gap-2 ${isMe ? "flex-row" : "flex-row-reverse"}`}>
-                {/* Delete/unsend button — appears on hover only */}
+                {/* Delete/unsend button - appears on hover only */}
                 {canDelete && (
                   <button onClick={() => handleUnsend(msg._id)}
                     className="opacity-0 group-hover:opacity-100 transition text-white/30 hover:text-red-400 text-xs shrink-0"
@@ -199,7 +199,7 @@ const GroupChat = ({ societyId, currentUserName, currentUserRole }) => {
             </div>
           );
         })}
-        {/* Invisible div at bottom — scrollIntoView targets this for auto-scroll */}
+        {/* Invisible div at bottom - scrollIntoView targets this for auto-scroll */}
         <div ref={bottomRef} />
       </div>
 
@@ -215,11 +215,11 @@ const GroupChat = ({ societyId, currentUserName, currentUserRole }) => {
 
       {/* ── INPUT BAR ─────────────────────────────────────────────────────── */}
       <form onSubmit={sendMessage} className="flex gap-2 mt-4 pt-4 border-t border-white/10">
-        {/* Hidden file input — triggered when attach button is clicked */}
+        {/* Hidden file input - triggered when attach button is clicked */}
         <input type="file" accept="image/*,video/*" ref={fileInputRef} hidden
           onChange={(e) => setFile(e.target.files[0])} />
 
-        {/* Attach button — programmatically clicks the hidden file input */}
+        {/* Attach button - programmatically clicks the hidden file input */}
         <button type="button" onClick={() => fileInputRef.current?.click()}
           className="px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition text-sm shrink-0"
           title="Attach photo or video">

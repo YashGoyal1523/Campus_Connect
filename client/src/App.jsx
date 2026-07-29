@@ -8,7 +8,7 @@
 //   3. Redirecting already-authenticated users away from the public landing page.
 //
 // Architecture decision:
-//   Two guard components — ProtectedRoute and PublicRoute — handle all redirect
+//   Two guard components - ProtectedRoute and PublicRoute - handle all redirect
 //   logic in one place. This keeps individual page components clean and unaware
 //   of authentication concerns (single-responsibility principle).
 // ─────────────────────────────────────────────────────────────────────────────
@@ -33,23 +33,23 @@ import SocietyDashboard from "./pages/society/SocietyDashboard";
 //   - Otherwise, render the protected child component.
 //
 // Props:
-//   children — the page component to render if access is granted
-//   role     — the required role string: "student" or "society"
+//   children - the page component to render if access is granted
+//   role     - the required role string: "student" or "society"
 const ProtectedRoute = ({ children, role }) => {
   const { user, loading } = useContext(AppContext);
 
   // Wait until AppContext finishes checking localStorage / validating the token
-  // before making any redirect decision — prevents a flicker to "/" on page refresh
+  // before making any redirect decision - prevents a flicker to "/" on page refresh
   if (loading) return null;
 
-  // Not logged in at all — send to the landing page
+  // Not logged in at all - send to the landing page
   if (!user) return <Navigate to="/" />;
 
-  // Logged in but wrong role — also send to the landing page
+  // Logged in but wrong role - also send to the landing page
   // (e.g. a society account should never see the student dashboard)
   if (user.role !== role) return <Navigate to="/" />;
 
-  // All checks passed — render the actual page
+  // All checks passed - render the actual page
   return children;
 };
 
@@ -62,11 +62,11 @@ const ProtectedRoute = ({ children, role }) => {
 // login form, which would be confusing UX.
 //
 // Props:
-//   children — the page component to render if the user is NOT logged in
+//   children - the page component to render if the user is NOT logged in
 const PublicRoute = ({ children }) => {
   const { user, loading } = useContext(AppContext);
 
-  // Same loading guard as ProtectedRoute — avoid premature redirects
+  // Same loading guard as ProtectedRoute - avoid premature redirects
   if (loading) return null;
 
   // If a student is already logged in, redirect them straight to their feed
@@ -75,7 +75,7 @@ const PublicRoute = ({ children }) => {
   // If a society is already logged in, redirect them to their dashboard
   if (user?.role === "society") return <Navigate to="/society" />;
 
-  // No user logged in — show the public page (landing page)
+  // No user logged in - show the public page (landing page)
   return children;
 };
 
@@ -92,7 +92,7 @@ const PublicRoute = ({ children }) => {
 const App = () => {
   return (
     <Routes>
-      {/* Landing page — public, but redirects authenticated users to their dashboard */}
+      {/* Landing page - public, but redirects authenticated users to their dashboard */}
       <Route path="/" element={<PublicRoute><LandingPage /></PublicRoute>} />
 
       {/* Student dashboard and all its nested sub-routes (e.g. /student/discover).

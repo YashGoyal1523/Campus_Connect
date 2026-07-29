@@ -23,9 +23,9 @@ const Feed = () => {
 
   // posts: the array of post objects fetched from the server
   const [posts, setPosts] = useState([]);
-  // loading: true only during the very first fetch — shows a full-page skeleton
+  // loading: true only during the very first fetch - shows a full-page skeleton
   const [loading, setLoading] = useState(true);
-  // loadingMore: true when fetching additional pages — only disables the "Load More" button
+  // loadingMore: true when fetching additional pages - only disables the "Load More" button
   const [loadingMore, setLoadingMore] = useState(false);
   // hasMore: whether the server has more pages beyond what we've already fetched
   const [hasMore, setHasMore] = useState(false);
@@ -35,8 +35,8 @@ const Feed = () => {
   const [lightbox, setLightbox] = useState(null);
 
   // fetchData fetches a page of feed posts.
-  // pageNum — which page to request (defaults to 1 for the initial load).
-  // append — if true, new results are appended to the existing list (Load More);
+  // pageNum - which page to request (defaults to 1 for the initial load).
+  // append - if true, new results are appended to the existing list (Load More);
   //          if false, the list is replaced (initial load / refresh).
   const fetchData = async (pageNum = 1, append = false) => {
     try {
@@ -49,7 +49,7 @@ const Feed = () => {
     } catch (e) {
       toast.error(e.response?.data?.message || e.message);
     } finally {
-      // finally always runs — guarantees spinners are hidden even if the request fails
+      // finally always runs - guarantees spinners are hidden even if the request fails
       setLoading(false);
       setLoadingMore(false);
     }
@@ -146,7 +146,7 @@ const Feed = () => {
         </div>
       )}
 
-      {/* Lightbox overlay: rendered conditionally — only when a post is selected.
+      {/* Lightbox overlay: rendered conditionally - only when a post is selected.
           onClose resets lightbox to null, unmounting the overlay */}
       {lightbox && <PostLightbox post={lightbox} onClose={() => setLightbox(null)} />}
     </div>

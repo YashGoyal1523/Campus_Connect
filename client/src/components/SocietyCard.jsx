@@ -2,7 +2,7 @@
 // Props:
 //   - society: the society data object (logo, name, category, description, college, _id)
 //   - onClick: opens the society detail modal when the card is clicked
-//   - isFollowing: boolean — whether the logged-in student already follows this society
+//   - isFollowing: boolean - whether the logged-in student already follows this society
 //   - onToggleFollow: optional; when provided a Follow/Unfollow button is rendered inside the card
 const SocietyCard = ({ society, onClick, isFollowing, onToggleFollow }) => {
   return (
@@ -13,7 +13,7 @@ const SocietyCard = ({ society, onClick, isFollowing, onToggleFollow }) => {
     >
       {/* Fixed-height banner area at the top of the card.
           If the society has a logo we show it; otherwise we fall back to
-          a large initial letter inside a circle — a common avatar fallback pattern */}
+          a large initial letter inside a circle - a common avatar fallback pattern */}
       <div className="h-32 bg-linear-to-br from-purple-500/20 to-blue-500/20 flex items-center justify-center shrink-0">
         {society.logo
           ? <img src={society.logo} alt={society.name} className="w-20 h-20 object-contain rounded-full" />
@@ -48,7 +48,7 @@ const SocietyCard = ({ society, onClick, isFollowing, onToggleFollow }) => {
         {onToggleFollow && (
           <button
             // stopPropagation prevents the card's onClick (openSociety) from firing
-            // when the user clicks Follow — we only want to toggle follow, not also open the modal
+            // when the user clicks Follow - we only want to toggle follow, not also open the modal
             onClick={(e) => { e.stopPropagation(); onToggleFollow(society._id); }}
             // Button styling changes dynamically depending on follow state:
             //   - Following: muted style that turns red on hover (signals "click to unfollow")

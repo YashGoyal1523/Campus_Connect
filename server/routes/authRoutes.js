@@ -13,9 +13,9 @@
 //   DELETE /api/auth/me
 //
 // Middleware used:
-//   upload        — multer middleware (memory storage) that parses multipart/form-data
+//   upload        - multer middleware (memory storage) that parses multipart/form-data
 //                   and makes the uploaded file available at req.file
-//   verifyToken   — checks the Authorization header for a valid JWT, then attaches
+//   verifyToken   - checks the Authorization header for a valid JWT, then attaches
 //                   the decoded user payload (id + role) to req.user
 // ─────────────────────────────────────────────────────────────────────────────
 
